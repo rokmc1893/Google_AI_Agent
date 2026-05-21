@@ -207,7 +207,7 @@ export default function Dashboard() {
 
   // Python 백엔드 로직에 기반한 시뮬레이션 결과 생성
   const generateSimulationData = () => {
-    const isSubcontract = inputText.includes("영구 귀속") || inputText.includes("0.3%") || inputText.includes("비밀유지") || selectedSample === 'subcontract';
+    const isSubcontract = inputText.includes("영구 귀속") || inputText.includes("0.3%") || selectedSample === 'subcontract';
     
     let masked = inputText
       .replace(/주식회사 대성전자/g, "[COMPANY_A]")
@@ -333,6 +333,14 @@ export default function Dashboard() {
   // 계약서 텍스트 중 독소 조항을 실시간으로 감지하여 하이라이트하는 렌더링 함수
   const renderHighlightedContract = (text, selectedId, onSelect) => {
     if (!text) return <p className="text-slate-500 text-sm">계약서 내용이 비어있습니다.</p>;
+    
+    // 안전 계약서(이슈 없음)의 경우 조항 하이라이트 렌더링을 완전히 생략
+    if (simState.issues.length === 0) {
+      return text.split('\n').map((line, idx) => (
+        <p key={idx} className="mb-2.5 text-slate-400 font-mono text-xs">{line}</p>
+      ));
+    }
+
     const lines = text.split('\n');
     return lines.map((line, idx) => {
       let isIntellectualProperty = line.includes("지식재산권") || line.includes("제8조") || line.includes("영구 귀속");
