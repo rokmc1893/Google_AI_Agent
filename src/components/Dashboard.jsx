@@ -150,8 +150,16 @@ export default function Dashboard() {
         };
         reader.readAsText(file);
       } else {
-        // PDF, DOCX는 데모 시뮬레이션용 불공정 계약서 기본 매핑
-        setInputText(SAMPLE_CONTRACTS.subcontract);
+        // PDF, DOCX는 데모 시뮬레이션용 파일명에 따라 매핑 분기
+        const isCleanKeyword = file.name.includes("표준") || 
+                               file.name.includes("합의본") || 
+                               file.name.includes("clean") || 
+                               file.name.includes("safe");
+        if (isCleanKeyword) {
+          setInputText(SAMPLE_CONTRACTS.clean);
+        } else {
+          setInputText(SAMPLE_CONTRACTS.subcontract);
+        }
       }
       setShowResults(false);
     } else {
