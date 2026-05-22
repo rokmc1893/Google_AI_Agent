@@ -9,6 +9,9 @@ mock으로 대체하여 테스트 환경 독립성을 보장합니다.
 import json
 import os
 import textwrap
+
+# FAISS search는 일부 macOS/Python 3.13 환경에서 pytest 중 SIGABRT → NumPy 폴백
+os.environ.setdefault("LEGAL_DISABLE_FAISS", "1")
 from io import BytesIO
 from pathlib import Path
 from typing import Generator

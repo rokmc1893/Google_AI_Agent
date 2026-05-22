@@ -48,13 +48,26 @@ _PRICE_RE = re.compile(
     r"(?:\d{1,3}(?:,\d{3})*|\d+)\s*(?:억|만)?\s*원"
     r"|금\s*(?:\d{1,3}(?:,\d{3})*)\s*(?:억|만)?\s*원"
 )
-# 기업명: 주식회사, (주), 유한회사, LLC 형태
+# 기업명: 이름 본체만 매칭 (non-greedy + 조사 lookahead, $ 단독 허용 금지)
+_NAME_CORE = r"[가-힣A-Za-z0-9·&]{2,15}?"
+_PARTICLE_BOUNDARY = r"(?=[은이가를와과의도는,\.\)\s\"']|$)"
+_TRAILING_PARTICLES_RE = re.compile(r"[이가을를은는으며다]+$")
 _COMPANY_RE = re.compile(
-    r"(?:주식회사\s*[\w가-힣]+|[\w가-힣]+주식회사"
-    r"|\(주\)\s*[\w가-힣]+"
-    r"|[\w가-힣]+\s*\(주\)"
-    r"|유한회사\s*[\w가-힣]+"
-    r"|[\w가-힣]+\s*(?:Inc\.|LLC|Corp\.|Co\.,?\s*Ltd\.?))"
+    r"(?:"
+    rf"주식회사\s*{_NAME_CORE}{_PARTICLE_BOUNDARY}"
+    rf"|{_NAME_CORE}주식회사{_PARTICLE_BOUNDARY}"
+    rf"|\(주\)\s*{_NAME_CORE}{_PARTICLE_BOUNDARY}"
+    rf"|{_NAME_CORE}\s*\(주\){_PARTICLE_BOUNDARY}"
+    rf"|유한회사\s*{_NAME_CORE}{_PARTICLE_BOUNDARY}"
+    rf"|[가-힣]{{2,10}}(?:전자|화학|그룹|은행|증권|보험|공사|건설|중공업|시스템|솔루션|테크){_PARTICLE_BOUNDARY}"
+    rf"|{_NAME_CORE}\s*(?:Inc\.|LLC|Corp\.|Co\.,?\s*Ltd\.?){_PARTICLE_BOUNDARY}"
+    r")"
+)
+# 한국 인물명 (spaCy 미설치 시): 성씨 + 이름(1~2글자), 조사 앞에서 종료
+_PERSON_RE = re.compile(
+    r"(?<![가-힣])"
+    r"([김이박최정강조윤장임한오서신권황안송류전홍][가-힣]{1,2})"
+    r"(?=[이가을를은는으며다]|(?!\w))"
 )
 
 
@@ -250,21 +263,19 @@ class MaskingEngine:
         for start, end, original, entity_type in sorted(entities, key=lambda x: x[0], reverse=True):
             if "[" in original or "]" in original:
                 continue
+            if entity_type == "PERSON":
+                trimmed = _TRAILING_PARTICLES_RE.sub("", original)
+                if trimmed and trimmed != original:
+                    original = trimmed
+                    end = start + len(original)
             token = self._get_or_create_token(entity_type, original)
             text = text[:start] + token + text[end:]
         return text
 
     def _mask_persons_regex(self, text: str) -> str:
-        """
-        spaCy 사용 불가 시 정규식으로 한국 인물명 패턴을 마스킹합니다.
-        한국 성씨 + 1~2글자 이름 패턴 (폴백)
-        """
-        _PERSON_RE = re.compile(
-            r"(?<![가-힣])([김이박최정강조윤장임](?:[가-힣]{1,2}))(?![가-힣])"
-        )
-
+        """spaCy 사용 불가 시 정규식으로 한국 인물명 패턴을 마스킹합니다."""
         def replace(match: re.Match) -> str:
-            original = match.group(0)
+            original = match.group(1)
             return self._get_or_create_token("PERSON", original)
 
         return _PERSON_RE.sub(replace, text)

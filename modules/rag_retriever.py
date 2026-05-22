@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Optional, Union
@@ -153,10 +154,21 @@ class DenseIndex:
         self._documents = documents
         self._embed_fn = embed_fn
         self._index = None
+        self._vectors: Optional[np.ndarray] = None
         self._dim: int = 0
 
         if documents:
             self._build_index(faiss)
+
+    @staticmethod
+    def _faiss_search_enabled() -> bool:
+        """pytest·macOS 등에서 FAISS search SIGABRT 시 NumPy 폴백."""
+        flag = os.environ.get("LEGAL_DISABLE_FAISS", "").lower()
+        if flag in ("1", "true", "yes"):
+            return False
+        if os.environ.get("PYTEST_CURRENT_TEST"):
+            return False
+        return True
 
     def _build_index(self, faiss_module) -> None:
         """문서 벡터를 임베딩하여 FAISS 인덱스를 구축합니다."""
@@ -170,8 +182,21 @@ class DenseIndex:
         vectors = vectors / norms
 
         self._dim = vectors.shape[1]
-        self._index = faiss_module.IndexFlatIP(self._dim)
-        self._index.add(vectors)
+        self._vectors = vectors
+        if self._faiss_search_enabled():
+            self._index = faiss_module.IndexFlatIP(self._dim)
+            self._index.add(vectors)
+
+    def _numpy_search(
+        self, query_vec: np.ndarray, k: int
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """FAISS 미사용 시 코사인 유사도(정규화 내적)로 검색."""
+        if self._vectors is None or not self._documents:
+            return np.array([]), np.array([])
+        sims = (self._vectors @ query_vec.T).flatten()
+        k = min(k, len(self._documents))
+        indices = np.argsort(-sims)[:k]
+        return sims[indices], indices
 
     def get_scores(self, query: str, top_k: int) -> tuple[np.ndarray, np.ndarray]:
         """
@@ -192,8 +217,10 @@ class DenseIndex:
             query_vec = query_vec / norm
 
         k = min(top_k, len(self._documents))
-        scores, indices = self._index.search(query_vec, k)
-        return scores[0], indices[0]
+        if self._index is not None:
+            scores, indices = self._index.search(query_vec, k)
+            return scores[0], indices[0]
+        return self._numpy_search(query_vec, k)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
