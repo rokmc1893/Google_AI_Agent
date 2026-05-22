@@ -2,7 +2,7 @@ export interface LegalRisk {
   id: string;
   clauseName: string;
   severity: 'high' | 'medium' | 'low';
-  category: 'Liability' | 'Confidentiality' | 'Jurisdiction' | 'Intellectual Property' | 'Term & Termination';
+  category: string;
   summary: string;
   originalText: string;
   recommendation: string;
@@ -19,83 +19,83 @@ export interface ContractData {
 }
 
 export const sampleContract: ContractData = {
-  title: "Mutual Non-Disclosure Agreement (NDA)",
-  type: "Confidentiality Agreement",
-  lastUpdated: "2026-05-21",
-  fullText: `MUTUAL NON-DISCLOSURE AGREEMENT
+  title: "상호 비밀유지약정서 (Mutual NDA)",
+  type: "비밀유지약정서",
+  lastUpdated: "2026-05-22",
+  fullText: `상호 비밀유지계약서 (Mutual NDA)
 
-This Mutual Non-Disclosure Agreement (the "Agreement") is entered into by and between Deepgle Design LLC ("Company") and Global Ventures Inc. ("Partner").
+본 상호 비밀유지계약서(이하 "본 계약")는 주식회사 딥글디자인(이하 "갑")과 글로벌벤처스 주식회사(이하 "을") 간에 체결되었습니다.
 
-1. PURPOSE & CONFIDENTIAL INFORMATION
-The parties wish to explore a business opportunity of mutual interest (the "Purpose"). In connection with the Purpose, either party may disclose to the other party certain proprietary, sensitive, and confidential information, whether written, oral, or visual, labeled as confidential or which by its nature should be reasonably understood to be confidential.
+제1조 (목적 및 비밀정보)
+양 당사자는 공동 사업 기회 모색(이하 "본 목적")을 희망합니다. 본 목적과 관련하여 양 당사자는 서면, 구두 또는 시각적 형태로 공개되는 독점적이고 민감한 정보로서 비밀로 표시되거나 성질상 비밀로 합리적으로 이해되어야 하는 정보(이하 "비밀정보")를 상대방에게 공개할 수 있습니다.
 
-2. STANDARD OF CARE & PERMITTED USE
-The Receiving Party shall maintain the Confidential Information in strict confidence and shall use at least the same degree of care, but no less than a reasonable degree of care, to prevent the unauthorized disclosure or use of the Disclosing Party's Confidential Information. The Receiving Party shall use the Confidential Information solely for the Purpose.
+제2조 (비밀유지 의무 및 사용 제한)
+비밀정보를 수령한 당사자(이하 "수령인")는 제공 당사자(이하 "공개자")의 비밀정보가 무단으로 공개되거나 사용되지 않도록 신의성실의 의무를 다하고, 합리적인 수준 이상의 주의를 기울여 비밀정보를 관리하여야 합니다. 수령인은 본 목적을 위해서만 비밀정보를 사용하여야 합니다.
 
-3. UNILATERAL PERPETUAL OBLIGATION
-Notwithstanding any termination of this Agreement, the Receiving Party’s obligations under this Agreement with respect to all Confidential Information disclosed shall continue in perpetuity from the date of disclosure. The Receiving Party agrees that all obligations of confidentiality shall remain binding indefinitely, regardless of whether the information ceases to be a trade secret or falls into the public domain through no fault of the Receiving Party.
+제3조 (일방적 영구 비밀유지 의무)
+본 계약의 해지 또는 만료 여부에 관계없이, 본 계약에 따라 공개된 모든 비밀정보에 대한 수령인의 비밀유지 의무는 공개일로부터 영구적으로 존속합니다. 수령인은 해당 정보가 거래상의 비밀에 해당하지 않게 되거나, 수령인의 귀책 사유 없이 공공 영역에 공개되는지 여부와 관계없이 본 계약에 따른 모든 비밀유지 의무가 무기한 효력을 유지한다는 것에 동의합니다.
 
-4. INDEMNIFICATION AND UNLIMITED LIABILITY
-The Receiving Party agrees to indemnify, defend, and hold harmless the Disclosing Party from and against any and all claims, liabilities, losses, damages, costs, or expenses (including reasonable attorneys' fees) arising out of or in connection with any breach of this Agreement by the Receiving Party. The Receiving Party agrees that its liability under this Section 4 shall be completely unlimited and shall not be subject to any caps or limitations of liability agreed upon elsewhere.
+제4조 (손해배상 및 무제한 책임)
+수령인은 수령인의 본 계약 위반으로 인해 발생하거나 이와 관련하여 발생하는 모든 청구, 부채, 손실, 손해, 비용 또는 지출(합리적인 변호사 수임료 포함)로부터 공개자를 면책하고 방어하며 피해가 없도록 하는 것에 동의합니다. 또한 수령인은 본 제4조에 따른 책임을 전적으로 무제한으로 부담하며, 다른 합의사항에 따른 책임 제한이나 한도의 적용을 받지 않는다는 것에 동의합니다.
 
-5. INTELLECTUAL PROPERTY OWNERSHIP AND AUTOMATIC ASSIGNMENT
-All Confidential Information remains the sole property of the Disclosing Party. However, if the Receiving Party suggests any feedback, improvements, or modifications to the Disclosing Party's technology or business during the term of this Agreement, the Receiving Party hereby automatically and irrevocably assigns all right, title, and interest in and to such feedback, including all intellectual property rights therein, to the Disclosing Party without any requirement for further consideration or compensation.
+제5조 (지식재산권 소유권 및 자동 양도)
+모든 비밀정보는 공개자의 단독 소유로 유지됩니다. 다만, 수령인이 본 계약 기간 동안 공개자의 기술 또는 사업에 대한 피드백, 개선 사항 또는 수정 제안을 제공하는 경우, 수령인은 추가적인 대가나 보상 없이 해당 피드백과 관련된 모든 권리, 권원, 지식재산권을 공개자에게 자동으로 그리고 취소 불가능하게 양도합니다.
 
-6. GOVERNING LAW AND JURISDICTION
-This Agreement, and all claims or causes of action arising hereunder, shall be governed by, and construed in accordance with, the laws of the State of New York, without regard to its conflict of laws principles. Any legal suit, action, or proceeding arising out of or relating to this Agreement shall be instituted exclusively in the federal courts of the United States or the courts of the State of New York, in each case located in the City of New York, County of New York, and each party irrevocably submits to the exclusive jurisdiction of such courts.
+제6조 (준거법 및 관할합의)
+본 계약 및 이와 관련하여 발생하는 모든 청구 또는 소송 제기는 법률 저촉 원칙과 관계없이 대한민국 법률에 따라 해석되고 규율됩니다. 본 계약으로 인해 발생하거나 이와 관련된 모든 법적 소송 또는 절차는 서울중앙지방법원을 제1심 전속적 합의관할법원으로 지정합니다.
 
-IN WITNESS WHEREOF, the parties hereto have executed this Mutual Non-Disclosure Agreement as of the date first written above.`,
+본 계약의 체결을 증명하기 위해 양 당사자는 대표자를 통해 본 계약서를 작성하고 서명 날인합니다.`,
   risks: [
     {
       id: "risk-1",
-      clauseName: "Perpetual Obligations",
+      clauseName: "영구적 비밀유지 의무",
       severity: "medium",
-      category: "Confidentiality",
-      summary: "Indefinite confidentiality term creates an unreasonable, long-term compliance liability.",
-      originalText: "Notwithstanding any termination of this Agreement, the Receiving Party’s obligations under this Agreement with respect to all Confidential Information disclosed shall continue in perpetuity from the date of disclosure. The Receiving Party agrees that all obligations of confidentiality shall remain binding indefinitely, regardless of whether the information ceases to be a trade secret or falls into the public domain through no fault of the Receiving Party.",
-      recommendation: "The obligations of confidentiality under this Agreement shall survive the termination or expiration of this Agreement for a period of three (3) years; provided, however, that with respect to any Confidential Information that constitutes a trade secret under applicable law, such obligations shall survive for as long as such information remains a trade secret.",
-      analysisDetail: "Standard commercial NDAs typically limit the survival of confidentiality obligations to a standard period (commonly 2 to 5 years after termination). A perpetual term is legally enforceable but imposes extreme administrative burdens on tracking the data, exposing the company to accidental breach claims decades later. Furthermore, specifying that confidentiality applies even if information falls into the public domain violates the very definition of confidential information.",
+      category: "비밀유지 의무",
+      summary: "비밀유지 의무 기간을 영구적으로 지정하여 장기적인 법적 리스크와 규제 준수 부담을 초래합니다.",
+      originalText: "본 계약의 해지 또는 만료 여부에 관계없이, 본 계약에 따라 공개된 모든 비밀정보에 대한 수령인의 비밀유지 의무는 공개일로부터 영구적으로 존속합니다. 수령인은 해당 정보가 거래상의 비밀에 해당하지 않게 되거나, 수령인의 귀책 사유 없이 공공 영역에 공개되는지 여부와 관계없이 본 계약에 따른 모든 비밀유지 의무가 무기한 효력을 유지한다는 것에 동의합니다.",
+      recommendation: "본 계약에 따른 비밀유지 의무는 본 계약의 해지 또는 만료일로부터 삼(3) 년간 유효합니다. 단, 관련 법령상 영업비밀에 해당하는 정보는 법적으로 영업비밀로서의 지위를 유지하는 한 그 의무가 지속됩니다.",
+      analysisDetail: "표준 비밀유지 계약(NDA)에서는 의무 기간을 계약 종료 후 2~5년 수준으로 설정합니다. 영구적인 의무는 정보 관리 및 추적에 과도한 행정적 부담을 주며, 수십 년 후에 의도치 않은 계약 위반 소송에 휘말릴 위험이 있습니다. 또한 이미 공공 영역에 공개된 정보까지 무기한 비밀로 유지하도록 강제하는 조항은 상거래 관례상 불합리합니다.",
       remedyCost: "Medium"
     },
     {
       id: "risk-2",
-      clauseName: "Unlimited Indemnification Liability",
+      clauseName: "일방적 무제한 손해배상 책임",
       severity: "high",
-      category: "Liability",
-      summary: "Broad indemnification clause with carved-out unlimited liability exposes the company to extreme financial damages.",
-      originalText: "The Receiving Party agrees to indemnify, defend, and hold harmless the Disclosing Party from and against any and all claims, liabilities, losses, damages, costs, or expenses (including reasonable attorneys' fees) arising out of or in connection with any breach of this Agreement by the Receiving Party. The Receiving Party agrees that its liability under this Section 4 shall be completely unlimited and shall not be subject to any caps or limitations of liability agreed upon elsewhere.",
-      recommendation: "Either delete Section 4 (Indemnification) in its entirety—relying instead on standard common-law contract damages—or cap the total aggregate liability for breach of this Agreement to a reasonable dollar amount (e.g., $100,000 or the total fees paid under the relationship).",
-      analysisDetail: "Indemnification is highly unusual in a standard Mutual NDA. Breaches of NDA are normally addressed by direct damages, not indemnity, which forces you to pay for third-party lawsuit defenses and covers broad indirect damages. Declaring that liability is completely unlimited and immune to overall contract liability caps is a significant 'red flag' that increases risk exposure exponentially.",
+      category: "손해배상 책임",
+      summary: "상대방에 대한 포괄적 면책 및 무제한 책임 조항으로 인해 회사가 감당하기 어려운 재정적 배상 위험에 노출됩니다.",
+      originalText: "수령인은 수령인의 본 계약 위반으로 인해 발생하거나 이와 관련하여 발생하는 모든 청구, 부채, 손실, 손해, 비용 또는 지출(합리적인 변호사 수임료 포함)로부터 공개자를 면책하고 방어하며 피해가 없도록 하는 것에 동의합니다. 또한 수령인은 본 제4조에 따른 책임을 전적으로 무제한으로 부담하며, 다른 합의사항에 따른 책임 제한이나 한도의 적용을 받지 않는다는 것에 동의합니다.",
+      recommendation: "본 계약의 위반으로 인한 양 당사자의 총 누적 손해배상 책임은 실제 발생한 직접적이고 통상적인 손해에 한하며, 어떠한 경우에도 금 일억(100,000,000) 원을 초과하지 아니합니다. 또한 간접 손해, 특별 손해 또는 징벌적 손해에 대해서는 책임지지 않습니다.",
+      analysisDetail: "단순 NDA에 포괄적 면책(Indemnification) 조항을 삽입하고, 전체적인 책임 제한 규정마저 적용받지 않는 무제한 책임으로 명시하는 것은 매우 위험한 독소 조항입니다. 일반적인 비밀유지 계약에서는 직접 손해배상 책임만 규정하고 책임 제한 한도(Liability Cap)를 명확히 추가하여 잠재적 손실 규모를 통제하여야 합니다.",
       remedyCost: "High"
     },
     {
       id: "risk-3",
-      clauseName: "Automatic Feedback Assignment",
+      clauseName: "피드백 지식재산권 자동 양도",
       severity: "high",
-      category: "Intellectual Property",
-      summary: "Automatic and irrevocable assignment of feedback transfers key intellectual property rights without compensation.",
-      originalText: "However, if the Receiving Party suggests any feedback, improvements, or modifications to the Disclosing Party's technology or business during the term of this Agreement, the Receiving Party hereby automatically and irrevocably assigns all right, title, and interest in and to such feedback, including all intellectual property rights therein, to the Disclosing Party without any requirement for further consideration or compensation.",
-      recommendation: "Any feedback, suggestions, or ideas provided by the Receiving Party are voluntary. The Disclosing Party is free to use, disclose, reproduce, or license such feedback without obligation or restriction, but the Receiving Party does not transfer or assign any intellectual property ownership in the feedback unless explicitly agreed in writing by both parties.",
-      analysisDetail: "An automatic assignment clause acts as a hidden intellectual property grab. If your product team brainstorms or suggests modifications while discussing collaboration, this clause would immediately transfer ownership of those ideas to the other party. A standard 'Feedback License' is much safer as it grants them a license to use the ideas but lets you retain ownership.",
+      category: "지식재산권",
+      summary: "제안된 피드백이나 개선 사항의 지식재산권을 아무런 대가 없이 상대방에게 자동 양도하도록 설계된 독소 조항입니다.",
+      originalText: "다만, 수령인이 본 계약 기간 동안 공개자의 기술 또는 사업에 대한 피드백, 개선 사항 또는 수정 제안을 제공하는 경우, 수령인은 추가적인 대가나 보상 없이 해당 피드백과 관련된 모든 권리, 권원, 지식재산권을 공개자에게 자동으로 그리고 취소 불가능하게 양도합니다.",
+      recommendation: "수령인이 제공하는 모든 피드백이나 제안은 자발적인 것이며, 양 당사자 간의 별도 서면 합의가 없는 한 이로 인해 지식재산권이 이전되거나 양도되지 않습니다. 단, 공개자는 수령인이 제공한 피드백을 내부 업무 목적으로 자유롭게 활용하고 비독점적으로 라이선스하여 사용할 수 있습니다.",
+      analysisDetail: "비즈니스 제휴 논의 단계에서 가볍게 공유하는 피드백과 아이디어를 일방적으로 갈취해 가는 악성 조항입니다. 당사의 핵심 고유 기술 및 아이디어가 상대방에게 무상 귀속되는 것을 방지하기 위해, 권리 양도가 아닌 내부적 단순 사용 라이선스 형태로만 계약을 제약하도록 대폭 수정이 요구됩니다.",
       remedyCost: "High"
     },
     {
       id: "risk-4",
-      clauseName: "Governing Law & Exclusive Jurisdiction",
+      clauseName: "편면적 관할합의 법원",
       severity: "low",
-      category: "Jurisdiction",
-      summary: "Governing law set to New York. Requires exclusive venue in New York courts, which may be inconvenient.",
-      originalText: "This Agreement, and all claims or causes of action arising hereunder, shall be governed by, and construed in accordance with, the laws of the State of New York, without regard to its conflict of laws principles. Any legal suit, action, or proceeding arising out of or relating to this Agreement shall be instituted exclusively in the federal courts of the United States or the courts of the State of New York, in each case located in the City of New York, County of New York, and each party irrevocably submits to the exclusive jurisdiction of such courts.",
-      recommendation: "If both parties are based in different jurisdictions, consider a neutral forum, or amend to the home jurisdiction of the party defending a claim. If New York is acceptable, keep as is.",
-      analysisDetail: "New York law is standard and well-understood for commercial contracts, making it low risk. However, exclusive jurisdiction in New York federal/state courts means any dispute requires your team to travel and hire local New York counsel.",
+      category: "관할권",
+      summary: "분쟁 발생 시 관할 법원을 서울중앙지방법원 또는 특정 원격 법원으로 한정하여 소송 진행 비용 및 부담을 키웁니다.",
+      originalText: "본 계약 및 이와 관련하여 발생하는 모든 청구 또는 소송 제기는 법률 저촉 원칙과 관계없이 대한민국 법률에 따라 해석되고 규율됩니다. 본 계약으로 인해 발생하거나 이와 관련된 모든 법적 소송 또는 절차는 서울중앙지방법원을 제1심 전속적 합의관할법원으로 지정합니다.",
+      recommendation: "본 계약과 관련하여 발생할 수 있는 분쟁의 제1심 관할법원은 소송을 제기당한 피고 당사자의 소재지 관할 법원으로 하거나, 당사자 간 합의 하에 중재 절차 또는 민사소송법에 따른 관할을 따릅니다.",
+      analysisDetail: "준거법을 대한민국 법률로 하고 서울중앙지방법원 관할로 지정하는 것은 일반적이나, 당사 회사 소재지가 서울 외 지역이거나 해외 진출 시 원격지 법원 대응에 따른 시간과 변호사 비용이 추가 부담될 수 있습니다. 실무적으로는 소송을 당한 피고의 주소지 법원에서 진행하는 피고 관할주의가 가장 방어적이고 유리합니다.",
       remedyCost: "Low"
     }
   ]
 };
 
-// Korean translation metadata to show beautiful Korean headings and tooltips
+// 한국어 번역 메타데이터
 export const koreanHeadings = {
-  dashboardTitle: "법률 검토 스크리닝 어시스턴트",
+  dashboardTitle: "AI 법률 스크리닝 어시스턴트",
   showroomTitle: "디자인 시스템 쇼룸",
   riskSummary: "리스크 요약 현황",
   totalRisks: "총 발견 리스크",
@@ -118,3 +118,4 @@ export const koreanHeadings = {
   originalClause: "원본 조항",
   suggestedClause: "수정 권고안"
 };
+
