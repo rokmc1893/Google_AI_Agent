@@ -143,14 +143,14 @@ def get_embed_fn() -> Any:
         try:
             from langchain_openai import OpenAIEmbeddings
             embed_model = OpenAIEmbeddings(
-                model="text-embedding-3-small", api_key=api_key
+                model="text-embedding-3-small", dimensions=384, api_key=api_key, max_retries=0
             )
             
             def safe_embed(text: str) -> list:
                 # Check cache first
                 cached = _embedding_cache.get(text, "openai")
                 if cached is not None:
-                    if len(cached) == 1536:
+                    if len(cached) == 384:
                         return cached
                 
                 try:
@@ -158,9 +158,11 @@ def get_embed_fn() -> Any:
                     _embedding_cache.set(text, "openai", vector)
                     return vector
                 except Exception as e:
-                    print(f"[OpenAI Embedding Error] {e}. Falling back to deterministic 1536-dim vector.")
-                    # Fallback to local 1536-dimensional vector without saving to cache
-                    return deterministic_embed(text, 1536).tolist()
+                    print(f"[OpenAI Embedding Error] {e}. Falling back to deterministic 384-dim vector.")
+                    # Fallback to local 384-dimensional vector and save to cache to prevent slow retries
+                    vector = deterministic_embed(text, 384).tolist()
+                    _embedding_cache.set(text, "openai", vector)
+                    return vector
                     
             return safe_embed
         except Exception as e:

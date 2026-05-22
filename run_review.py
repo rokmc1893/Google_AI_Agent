@@ -418,7 +418,7 @@ def main():
                 try:
                     from langchain_openai import OpenAIEmbeddings
                     embed_model = OpenAIEmbeddings(
-                        model="text-embedding-3-small", api_key=api_key
+                        model="text-embedding-3-small", dimensions=384, api_key=api_key
                     )
                     embed_fn = embed_model.embed_query
                     print("   → OpenAI 임베딩 사용")

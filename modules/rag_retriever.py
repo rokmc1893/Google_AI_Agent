@@ -112,8 +112,22 @@ class BM25Index:
 
     @staticmethod
     def _tokenize(text: str) -> list[str]:
-        """공백 기반 토크나이징 (태그/숫자 포함)."""
-        return text.split()
+        """한국어 키워드 매칭을 위해 어절 분리 및 character bi-gram 토큰 생성."""
+        import re
+        words = text.split()
+        tokens = []
+        for word in words:
+            # 특수 기호 제거
+            clean_word = re.sub(r"[^a-zA-Z0-9가-힣]", "", word)
+            if not clean_word:
+                continue
+            tokens.append(clean_word)
+            # 한국어 음절이 포함된 경우 bi-gram 토큰 추가
+            if any('가' <= char <= '힣' for char in clean_word):
+                if len(clean_word) >= 2:
+                    for i in range(len(clean_word) - 1):
+                        tokens.append(clean_word[i:i+2])
+        return tokens
 
     def get_scores(self, query: str) -> np.ndarray:
         """
