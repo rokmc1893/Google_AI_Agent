@@ -41,7 +41,7 @@ def embed_texts(texts: List[str]) -> List[List[float]]:
 
 
 def probe_embedding_model() -> bool:
-    """가벼운 probe — 전체 모델 로드."""
+    """가벼운 probe - 전체 모델 로드."""
     global _probe_ok
     if _probe_ok is not None:
         return _probe_ok

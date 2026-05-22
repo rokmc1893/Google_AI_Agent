@@ -1,4 +1,4 @@
-"""Phase 7 — LangGraph workflow."""
+"""Phase 7 - LangGraph workflow."""
 
 from backend.graph.workflow import compile_screening_graph, langgraph_available
 
