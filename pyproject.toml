@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "legal-review-agent"
+version = "0.1.0"
+description = "사내 규정 및 판례 기반 법무 검토 자동화 에이전트"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+]
+markers = [
+    "slow: 느린 테스트 (실제 LLM 호출)",
+    "integration: 통합 테스트 (외부 서비스 필요)",
+    "unit: 단위 테스트 (mock 사용)",
+]
+
+[tool.coverage.run]
+source = ["modules"]
+omit = ["tests/*", "conftest.py"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
