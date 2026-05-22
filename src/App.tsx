@@ -20,8 +20,8 @@ function App() {
               <span className="font-extrabold text-slate-900 tracking-tight text-base group-hover:text-navy-800 transition-colors">
                 Deepgle <span className="font-medium text-slate-600">Legal</span>
               </span>
-              <span className="block text-[8.5px] uppercase tracking-widest text-slate-500 font-bold -mt-0.5 font-mono">
-                Screening Assistant
+              <span className="block text-[8.5px] uppercase tracking-wider text-slate-500 font-bold -mt-0.5">
+                AI 법률 스크리닝 어시스턴트
               </span>
             </div>
           </div>
@@ -81,10 +81,10 @@ function App() {
             <ShieldCheck className="w-4 h-4 text-navy-800" />
             <span>&copy; {new Date().getFullYear()} Deepgle Legal. All rights reserved.</span>
           </div>
-          <div className="flex items-center gap-1">
-            <span>Designed with</span>
+          <div className="flex items-center gap-1.5">
+            <span>법률 전문가들을 위해</span>
             <Heart className="w-3 h-3 text-rose-500 fill-rose-500" />
-            <span>for professionals.</span>
+            <span>제작되었습니다.</span>
           </div>
         </div>
       </footer>

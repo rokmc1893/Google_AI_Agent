@@ -38,7 +38,7 @@ export function useScreeningMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: runFullScreening,
-    onSuccess: (data) => {
+    onSuccess: (data: ScreeningFlowResult) => {
       queryClient.setQueryData(screeningKeys.result(data.upload.job_id), data.screening);
     },
   });

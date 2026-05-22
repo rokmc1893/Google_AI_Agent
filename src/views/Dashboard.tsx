@@ -68,7 +68,53 @@ function computeWordDiff(str1: string, str2: string) {
   return diff;
 }
 
+const INITIAL_BLOCKS: ContractBlock[] = [
+  { 
+    id: 'intro', 
+    text: `상호 비밀유지계약서 (Mutual NDA)\n\n본 상호 비밀유지계약서(이하 "본 계약")는 주식회사 딥글디자인(이하 "갑")과 글로벌벤처스 주식회사(이하 "을") 간에 체결되었습니다.\n\n제1조 (목적 및 비밀정보)\n양 당사자는 공동 사업 기회 모색(이하 "본 목적")을 희망합니다. 본 목적과 관련하여 양 당사자는 서면, 구두 또는 시각적 형태로 공개되는 독점적이고 민감한 정보로서 비밀로 표시되거나 성질상 비밀로 합리적으로 이해되어야 하는 정보(이하 "비밀정보")를 상대방에게 공개할 수 있습니다.\n\n제2조 (비밀유지 의무 및 사용 제한)\n비밀정보를 수령한 당사자(이하 "수령인")는 제공 당사자(이하 "공개자")의 비밀정보가 무단으로 공개되거나 사용되지 않도록 신의성실의 의무를 다하고, 합리적인 수준 이상의 주의를 기울여 비밀정보를 관리하여야 합니다. 수령인은 본 목적을 위해서만 비밀정보를 사용하여야 합니다.`,
+    isRisk: false 
+  },
+  { 
+    id: 'risk-1', 
+    text: `제3조 (일방적 영구 비밀유지 의무)\n본 계약의 해지 또는 만료 여부에 관계없이, 본 계약에 따라 공개된 모든 비밀정보에 대한 수령인의 비밀유지 의무는 공개일로부터 영구적으로 존속합니다. 수령인은 해당 정보가 거래상의 비밀에 해당하지 않게 되거나, 수령인의 귀책 사유 없이 공공 영역에 공개되는지 여부와 관계없이 본 계약에 따른 모든 비밀유지 의무가 무기한 효력을 유지한다는 것에 동의합니다.`, 
+    isRisk: true, 
+    riskId: 'risk-1',
+    isResolved: false,
+    originalText: `제3조 (일방적 영구 비밀유지 의무)\n본 계약의 해지 또는 만료 여부에 관계없이, 본 계약에 따라 공개된 모든 비밀정보에 대한 수령인의 비밀유지 의무는 공개일로부터 영구적으로 존속합니다. 수령인은 해당 정보가 거래상의 비밀에 해당하지 않게 되거나, 수령인의 귀책 사유 없이 공공 영역에 공개되는지 여부와 관계없이 본 계약에 따른 모든 비밀유지 의무가 무기한 효력을 유지한다는 것에 동의합니다.`
+  },
+  { 
+    id: 'risk-2', 
+    text: `제4조 (손해배상 및 무제한 책임)\n수령인은 수령인의 본 계약 위반으로 인해 발생하거나 이와 관련하여 발생하는 모든 청구, 부채, 손실, 손해, 비용 또는 지출(합리적인 변호사 수임료 포함)로부터 공개자를 면책하고 방어하며 피해가 없도록 하는 것에 동의합니다. 또한 수령인은 본 제4조에 따른 책임을 전적으로 무제한으로 부담하며, 다른 합의사항에 따른 책임 제한이나 한도의 적용을 받지 않는다는 것에 동의합니다.`, 
+    isRisk: true, 
+    riskId: 'risk-2',
+    isResolved: false,
+    originalText: `제4조 (손해배상 및 무제한 책임)\n수령인은 수령인의 본 계약 위반으로 인해 발생하거나 이와 관련하여 발생하는 모든 청구, 부채, 손실, 손해, 비용 또는 지출(합리적인 변호사 수임료 포함)로부터 공개자를 면책하고 방어하며 피해가 없도록 하는 것에 동의합니다. 또한 수령인은 본 제4조에 따른 책임을 전적으로 무제한으로 부담하며, 다른 합의사항에 따른 책임 제한이나 한도의 적용을 받지 않는다는 것에 동의합니다.`
+  },
+  { 
+    id: 'risk-3', 
+    text: `제5조 (지식재산권 소유권 및 자동 양도)\n모든 비밀정보는 공개자의 단독 소유로 유지됩니다. 다만, 수령인이 본 계약 기간 동안 공개자의 기술 또는 사업에 대한 피드백, 개선 사항 또는 수정 제안을 제공하는 경우, 수령인은 추가적인 대가나 보상 없이 해당 피드백과 관련된 모든 권리, 권원, 지식재산권을 공개자에게 자동으로 그리고 취소 불가능하게 양도합니다.`, 
+    isRisk: true, 
+    riskId: 'risk-3',
+    isResolved: false,
+    originalText: `제5조 (지식재산권 소유권 및 자동 양도)\n모든 비밀정보는 공개자의 단독 소유로 유지됩니다. 다만, 수령인이 본 계약 기간 동안 공개자의 기술 또는 사업에 대한 피드백, 개선 사항 또는 수정 제안을 제공하는 경우, 수령인은 추가적인 대가나 보상 없이 해당 피드백과 관련된 모든 권리, 권원, 지식재산권을 공개자에게 자동으로 그리고 취소 불가능하게 양도합니다.`
+  },
+  { 
+    id: 'risk-4', 
+    text: `제6조 (준거법 및 관할합의)\n본 계약 및 이와 관련하여 발생하는 모든 청구 또는 소송 제기는 법률 저촉 원칙과 관계없이 대한민국 법률에 따라 해석되고 규율됩니다. 본 계약으로 인해 발생하거나 이와 관련된 모든 법적 소송 또는 절차는 서울중앙지방법원을 제1심 전속적 합의관할법원으로 지정합니다.`, 
+    isRisk: true, 
+    riskId: 'risk-4',
+    isResolved: false,
+    originalText: `제6조 (준거법 및 관할합의)\n본 계약 및 이와 관련하여 발생하는 모든 청구 또는 소송 제기는 법률 저촉 원칙과 관계없이 대한민국 법률에 따라 해석되고 규율됩니다. 본 계약으로 인해 발생하거나 이와 관련된 모든 법적 소송 또는 절차는 서울중앙지방법원을 제1심 전속적 합의관할법원으로 지정합니다.`
+  },
+  { 
+    id: 'outro', 
+    text: `\n본 계약의 체결을 증명하기 위해 양 당사자는 대표자를 통해 본 계약서를 작성하고 서명 날인합니다.`, 
+    isRisk: false 
+  }
+];
+
 export const Dashboard: React.FC = () => {
+  const [isAnalyzed, setIsAnalyzed] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'viewer'>('overview');
   const [selectedRiskId, setSelectedRiskId] = useState<string>('risk-2'); // default highlight high risk
   const [searchTerm, setSearchTerm] = useState('');
@@ -86,50 +132,7 @@ export const Dashboard: React.FC = () => {
   const [shineBlockId, setShineBlockId] = useState<string | null>(null);
 
   // Stateful text blocks for direct interactive redlining
-  const [blocks, setBlocks] = useState<ContractBlock[]>([
-    { 
-      id: 'intro', 
-      text: `MUTUAL NON-DISCLOSURE AGREEMENT\n\nThis Mutual Non-Disclosure Agreement (the "Agreement") is entered into by and between Deepgle Design LLC ("Company") and Global Ventures Inc. ("Partner").\n\n1. PURPOSE & CONFIDENTIAL INFORMATION\nThe parties wish to explore a business opportunity of mutual interest (the "Purpose"). In connection with the Purpose, either party may disclose to the other party certain proprietary, sensitive, and confidential information, whether written, oral, or visual, labeled as confidential or which by its nature should be reasonably understood to be confidential.\n\n2. STANDARD OF CARE & PERMITTED USE\nThe Receiving Party shall maintain the Confidential Information in strict confidence and shall use at least the same degree of care, but no less than a reasonable degree of care, to prevent the unauthorized disclosure or use of the Disclosing Party's Confidential Information. The Receiving Party shall use the Confidential Information solely for the Purpose.`,
-      isRisk: false 
-    },
-    { 
-      id: 'risk-1', 
-      text: `3. UNILATERAL PERPETUAL OBLIGATION\nNotwithstanding any termination of this Agreement, the Receiving Party’s obligations under this Agreement with respect to all Confidential Information disclosed shall continue in perpetuity from the date of disclosure. The Receiving Party agrees that all obligations of confidentiality shall remain binding indefinitely, regardless of whether the information ceases to be a trade secret or falls into the public domain through no fault of the Receiving Party.`, 
-      isRisk: true, 
-      riskId: 'risk-1',
-      isResolved: false,
-      originalText: `3. UNILATERAL PERPETUAL OBLIGATION\nNotwithstanding any termination of this Agreement, the Receiving Party’s obligations under this Agreement with respect to all Confidential Information disclosed shall continue in perpetuity from the date of disclosure. The Receiving Party agrees that all obligations of confidentiality shall remain binding indefinitely, regardless of whether the information ceases to be a trade secret or falls into the public domain through no fault of the Receiving Party.`
-    },
-    { 
-      id: 'risk-2', 
-      text: `4. INDEMNIFICATION AND UNLIMITED LIABILITY\nThe Receiving Party agrees to indemnify, defend, and hold harmless the Disclosing Party from and against any and all claims, liabilities, losses, damages, costs, or expenses (including reasonable attorneys' fees) arising out of or in connection with any breach of this Agreement by the Receiving Party. The Receiving Party agrees that its liability under this Section 4 shall be completely unlimited and shall not be subject to any caps or limitations of liability agreed upon elsewhere.`, 
-      isRisk: true, 
-      riskId: 'risk-2',
-      isResolved: false,
-      originalText: `4. INDEMNIFICATION AND UNLIMITED LIABILITY\nThe Receiving Party agrees to indemnify, defend, and hold harmless the Disclosing Party from and against any and all claims, liabilities, losses, damages, costs, or expenses (including reasonable attorneys' fees) arising out of or in connection with any breach of this Agreement by the Receiving Party. The Receiving Party agrees that its liability under this Section 4 shall be completely unlimited and shall not be subject to any caps or limitations of liability agreed upon elsewhere.`
-    },
-    { 
-      id: 'risk-3', 
-      text: `5. INTELLECTUAL PROPERTY OWNERSHIP AND AUTOMATIC ASSIGNMENT\nAll Confidential Information remains the sole property of the Disclosing Party. However, if the Receiving Party suggests any feedback, improvements, or modifications to the Disclosing Party's technology or business during the term of this Agreement, the Receiving Party hereby automatically and irrevocably assigns all right, title, and interest in and to such feedback, including all intellectual property rights therein, to the Disclosing Party without any requirement for further consideration or compensation.`, 
-      isRisk: true, 
-      riskId: 'risk-3',
-      isResolved: false,
-      originalText: `5. INTELLECTUAL PROPERTY OWNERSHIP AND AUTOMATIC ASSIGNMENT\nAll Confidential Information remains the sole property of the Disclosing Party. However, if the Receiving Party suggests any feedback, improvements, or modifications to the Disclosing Party's technology or business during the term of this Agreement, the Receiving Party hereby automatically and irrevocably assigns all right, title, and interest in and to such feedback, including all intellectual property rights therein, to the Disclosing Party without any requirement for further consideration or compensation.`
-    },
-    { 
-      id: 'risk-4', 
-      text: `6. GOVERNING LAW AND JURISDICTION\nThis Agreement, and all claims or causes of action arising hereunder, shall be governed by, and construed in accordance with, the laws of the State of New York, without regard to its conflict of laws principles. Any legal suit, action, or proceeding arising out of or relating to this Agreement shall be instituted exclusively in the federal courts of the United States or the courts of the State of New York, in each case located in the City of New York, County of New York, and each party irrevocably submits to the exclusive jurisdiction of such courts.`, 
-      isRisk: true, 
-      riskId: 'risk-4',
-      isResolved: false,
-      originalText: `6. GOVERNING LAW AND JURISDICTION\nThis Agreement, and all claims or causes of action arising hereunder, shall be governed by, and construed in accordance with, the laws of the State of New York, without regard to its conflict of laws principles. Any legal suit, action, or proceeding arising out of or relating to this Agreement shall be instituted exclusively in the federal courts of the United States or the courts of the State of New York, in each case located in the City of New York, County of New York, and each party irrevocably submits to the exclusive jurisdiction of such courts.`
-    },
-    { 
-      id: 'outro', 
-      text: `\nIN WITNESS WHEREOF, the parties hereto have executed this Mutual Non-Disclosure Agreement as of the date first written above.`, 
-      isRisk: false 
-    }
-  ]);
+  const [blocks, setBlocks] = useState<ContractBlock[]>(INITIAL_BLOCKS);
 
   const finishUploadUi = () => {
     setUploadStep(5);
@@ -159,6 +162,7 @@ export const Dashboard: React.FC = () => {
       console.log('[Deepgle] screening result', data.screening);
       setUploadStep(4);
       finishUploadUi();
+      setIsAnalyzed(true);
       setActiveTab('overview');
     } catch (err) {
       console.error('[Deepgle] upload/screen failed', err);
@@ -186,14 +190,24 @@ export const Dashboard: React.FC = () => {
     if (file) void runUploadFlow(file);
   };
 
+  // Reset to home view to analyze another contract
+  const handleReset = () => {
+    setIsAnalyzed(false);
+    setBlocks(INITIAL_BLOCKS);
+    setSelectedRiskId('risk-2');
+    setSearchTerm('');
+    setUploadStep(0);
+    setUploadSuccess(false);
+  };
+
   // Direct edit: apply AI recommendation to the document block text
   const handleApplyRecommendation = (riskId: string, recommendationText: string) => {
     setBlocks(prev => prev.map(block => {
       if (block.riskId === riskId) {
         // Find clause number from original block text to prefix
         const originalFirstLine = block.originalText?.split('\n')[0] || '';
-        const match = originalFirstLine.match(/^(\d+\.\s+)/);
-        const prefix = match ? match[1] : '';
+        const match = originalFirstLine.match(/^(제\d+조\s*(\([^)]+\))?)/);
+        const prefix = match ? match[1] + '\n' : '';
         
         return {
           ...block,
@@ -303,6 +317,181 @@ export const Dashboard: React.FC = () => {
     );
   };
 
+  if (!isAnalyzed) {
+    return (
+      <div className="w-full max-w-4xl mx-auto space-y-12 py-8 animate-fade-in-up">
+        {/* 헤더 안내 영역 */}
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center gap-1.5 bg-navy-50 text-navy-800 px-3.5 py-1.5 rounded-full border border-navy-100 text-xs font-semibold uppercase tracking-wider mb-2">
+            <Activity className="w-3.5 h-3.5" />
+            AI 법률 스크리닝 플랫폼
+          </div>
+          <h1 className="text-4xl font-extrabold text-slate-900 leading-tight tracking-tight">
+            계약서 검토를 더 쉽고, 빠르고, 안전하게
+          </h1>
+          <p className="text-sm text-slate-600 max-w-xl mx-auto leading-relaxed">
+            비밀유지계약서(NDA) 등 상거래 계약서를 업로드해 보세요. AI 엔진이 독소 조항과 면책 범위를 분석하여 실시간 대안 문구를 제안합니다.
+          </p>
+        </div>
+
+        {/* 대형 업로드 영역 */}
+        <div className="max-w-2xl mx-auto">
+          <Card variant="dashboard" className="flex flex-col justify-between border-dashed border-2 hover:border-navy-800/40 p-8 min-h-[380px] radial-glow-navy transition-all duration-300 group shadow-md bg-white">
+            <div className="space-y-6">
+              <CardHeader className="p-0 text-center">
+                <div className="mx-auto w-12 h-12 rounded-xl bg-navy-800/5 text-navy-800 flex items-center justify-center mb-3 group-hover:scale-105 group-hover:bg-navy-800/10 transition-all duration-300">
+                  <Upload className="w-6 h-6" />
+                </div>
+                <CardTitle className="text-xl font-bold text-slate-800">계약서 파일 분석 시작하기</CardTitle>
+                <CardDescription className="text-xs leading-relaxed max-w-md mx-auto mt-1">
+                  PDF, DOCX 등의 계약서 파일을 드래그 앤 드롭하거나 아래 영역을 클릭하여 업로드하면 AI 법률 분석 검토 프로세스가 시작됩니다.
+                </CardDescription>
+              </CardHeader>
+              
+              {/* Interactive Upload Dropzone or Sequential Process Loading State */}
+              <div 
+                className="border border-slate-200 border-dashed rounded-2xl p-6 bg-slate-50/50 text-center flex flex-col items-center justify-center cursor-pointer transition-all duration-300 hover:bg-slate-100/50 focus-within:ring-2 focus-within:ring-navy-800/20"
+                onClick={handleUpload}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleDrop}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.docx,.txt"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                {isUploading ? (
+                  <div className="flex flex-col items-start w-full gap-4 py-2 px-1 select-none animate-slide-in">
+                    <div className="flex items-center gap-2 w-full justify-center">
+                      <RefreshCw className="w-4 h-4 text-navy-800 animate-spin shrink-0" />
+                      <span className="text-xs font-bold text-slate-700">AI 정밀 계약서 분석 중...</span>
+                    </div>
+                    {/* Shimmering Timeline Steps */}
+                    <div className="space-y-3.5 w-full max-w-md mx-auto text-left py-2">
+                      <div className="flex items-center gap-2.5">
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
+                          uploadStep > 1 ? 'bg-emerald-500 text-white' : 'bg-navy-800 text-white animate-pulse'
+                        }`}>
+                          {uploadStep > 1 ? <Check className="w-3 h-3" /> : '1'}
+                        </span>
+                        <span className={`text-[11.5px] font-semibold transition-colors duration-300 ${uploadStep === 1 ? 'text-navy-800' : uploadStep > 1 ? 'text-slate-400' : 'text-slate-300'}`}>
+                          계약서 구조 파악 및 문서 벡터화
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-2.5">
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
+                          uploadStep > 2 ? 'bg-emerald-500 text-white' : uploadStep === 2 ? 'bg-navy-800 text-white animate-pulse' : 'bg-slate-200 text-slate-500'
+                        }`}>
+                          {uploadStep > 2 ? <Check className="w-3 h-3" /> : '2'}
+                        </span>
+                        <span className={`text-[11.5px] font-semibold transition-colors duration-300 ${uploadStep === 2 ? 'text-navy-800' : uploadStep > 2 ? 'text-slate-400' : 'text-slate-300'}`}>
+                          법률 위반 및 표준 조항 대비 검색
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-2.5">
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
+                          uploadStep > 3 ? 'bg-emerald-500 text-white' : uploadStep === 3 ? 'bg-navy-800 text-white animate-pulse' : 'bg-slate-200 text-slate-500'
+                        }`}>
+                          {uploadStep > 3 ? <Check className="w-3 h-3" /> : '3'}
+                        </span>
+                        <span className={`text-[11.5px] font-semibold transition-colors duration-300 ${uploadStep === 3 ? 'text-navy-800' : uploadStep > 3 ? 'text-slate-400' : 'text-slate-300'}`}>
+                          책임 한도액 및 면책 위험도 분류
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-2.5">
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
+                          uploadStep > 4 ? 'bg-emerald-500 text-white' : uploadStep === 4 ? 'bg-navy-800 text-white animate-pulse' : 'bg-slate-200 text-slate-500'
+                        }`}>
+                          {uploadStep > 4 ? <Check className="w-3 h-3" /> : '4'}
+                        </span>
+                        <span className={`text-[11.5px] font-semibold transition-colors duration-300 ${uploadStep === 4 ? 'text-navy-800' : 'text-slate-300'}`}>
+                          AI 최적 수정 권고 조항 최종 검토
+                        </span>
+                      </div>
+                    </div>
+                    {/* Shimmer line bar */}
+                    <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden mt-1 max-w-md mx-auto">
+                      <div className="bg-navy-800 h-full transition-all duration-300" style={{ width: `${(uploadStep - 1) * 25}%` }}></div>
+                    </div>
+                  </div>
+                ) : uploadSuccess ? (
+                  <div className="flex flex-col items-center gap-3 py-6 animate-scale-in">
+                    <div className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-500 animate-pulse-ring">
+                      <Check className="w-7 h-7" />
+                    </div>
+                    <span className="text-sm font-bold text-slate-800">계약서 분석 완료!</span>
+                    <span className="text-xs text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
+                      분석 결과 리포트 준비 완료
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-10">
+                    <FileText className="w-12 h-12 text-slate-400 group-hover:text-navy-800 group-hover:scale-105 transition-all duration-300 mb-4" />
+                    <span className="text-sm font-bold text-slate-800">마우스 클릭 또는 드래그하여 계약서 업로드</span>
+                    <span className="text-[11px] text-slate-500 mt-2">지원 형식: PDF, DOCX, TXT (최대 10MB)</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-slate-100 mt-6 flex items-center justify-center gap-1.5 text-xs text-slate-600 font-semibold">
+              <Info className="w-4 h-4 text-navy-800 shrink-0" />
+              <span>보안 규정: 민감 계약 정보 암호화 처리 및 외부 서버 비저장</span>
+            </div>
+          </Card>
+        </div>
+
+        {/* 주요 핵심 기능 그리드 */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 pt-6">
+          <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center space-y-2.5">
+            <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-slate-900 text-sm">독소 조항 실시간 검출</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              면책 조항, 무제한 손해배상 등 편면적인 계약 요소를 실시간 분석 및 탐지합니다.
+            </p>
+          </div>
+
+          <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center space-y-2.5">
+            <div className="w-10 h-10 rounded-xl bg-navy-50 text-navy-800 flex items-center justify-center mx-auto border border-navy-100">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-slate-900 text-sm">AI 맞춤 수정 권고</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              상법 및 표준 계약서를 바탕으로 즉시 반영 가능한 고품질 합의안을 작성합니다.
+            </p>
+          </div>
+
+          <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center space-y-2.5">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-100">
+              <FileCheck className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-slate-900 text-sm">단어 단위 레드라인</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              수정 전후 계약 조항의 삭제/추가된 문구를 색상별 인라인 비교로 쉽게 대조합니다.
+            </p>
+          </div>
+
+          <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center space-y-2.5">
+            <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center mx-auto border border-sky-100">
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-slate-900 text-sm">안전성 점수 진단</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              리스크 심각도를 합산하여 직관적인 계약 종합 안전 점수(0~100점)를 계산합니다.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-7xl mx-auto space-y-8 animate-fade-in-up">
       
@@ -321,33 +510,43 @@ export const Dashboard: React.FC = () => {
           </p>
         </div>
 
-        {/* View Switcher Controls */}
-        <div className="flex items-center gap-1.5 bg-slate-200/50 p-1.5 rounded-xl border border-slate-200/60 self-start shadow-sm">
+        {/* View Switcher Controls & Reset Button */}
+        <div className="flex flex-wrap items-center gap-3 self-start">
+          <div className="flex items-center gap-1.5 bg-slate-200/50 p-1.5 rounded-xl border border-slate-200/60 shadow-sm">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`px-4 py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-300 cursor-pointer ${
+                activeTab === 'overview'
+                  ? 'bg-white text-navy-800 shadow-sm border border-slate-200/50'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              분석 요약
+            </button>
+            <button
+              onClick={() => setActiveTab('viewer')}
+              className={`px-4 py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-300 flex items-center gap-2 cursor-pointer ${
+                activeTab === 'viewer'
+                  ? 'bg-white text-navy-800 shadow-sm border border-slate-200/50'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              실시간 문서 검토
+              {activeRisks.length > 0 && (
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                </span>
+              )}
+            </button>
+          </div>
+          
           <button
-            onClick={() => setActiveTab('overview')}
-            className={`px-4.5 py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-300 cursor-pointer ${
-              activeTab === 'overview'
-                ? 'bg-white text-navy-800 shadow-sm border border-slate-200/50'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
+            onClick={handleReset}
+            className="px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 rounded-xl text-xs font-bold transition-all duration-300 shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-98"
           >
-            대시보드 홈 (Overview)
-          </button>
-          <button
-            onClick={() => setActiveTab('viewer')}
-            className={`px-4.5 py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-300 flex items-center gap-2 cursor-pointer ${
-              activeTab === 'viewer'
-                ? 'bg-white text-navy-800 shadow-sm border border-slate-200/50'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            실시간 문서 스크리닝 (Viewer)
-            {activeRisks.length > 0 && (
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
-              </span>
-            )}
+            <RefreshCw className="w-3.5 h-3.5 text-slate-500" />
+            다른 계약서 분석하기
           </button>
         </div>
       </div>
@@ -403,7 +602,7 @@ export const Dashboard: React.FC = () => {
                   {/* Inside circle number */}
                   <div className="absolute flex flex-col items-center justify-center">
                     <span className="text-2xl font-extrabold text-slate-900 leading-none">{safetyScore}</span>
-                    <span className="text-[10px] text-slate-500 font-bold mt-0.5 uppercase tracking-wide">Score</span>
+                    <span className="text-[10px] text-slate-500 font-bold mt-0.5 uppercase tracking-wide">안전 점수</span>
                   </div>
                 </div>
 
@@ -512,253 +711,137 @@ export const Dashboard: React.FC = () => {
 
           </div>
 
-          {/* Interactive Screen & Upload Area */}
-          <div className="grid lg:grid-cols-12 gap-8 items-start">
-            
-            {/* Left side: Upload Card (4 Cols) */}
-            <div className="lg:col-span-4 space-y-6">
-              <Card variant="dashboard" className="flex flex-col justify-between border-dashed border-2 hover:border-navy-800/40 p-6 min-h-[440px] radial-glow-navy transition-all duration-300 group">
-                <div className="space-y-4">
-                  <CardHeader className="p-0">
-                    <div className="w-10 h-10 rounded-xl bg-navy-800/5 text-navy-800 flex items-center justify-center mb-2 group-hover:scale-105 group-hover:bg-navy-800/10 transition-all duration-300">
-                      <Upload className="w-5 h-5" />
-                    </div>
-                    <CardTitle className="text-lg font-bold text-slate-800">{koreanHeadings.uploadContract}</CardTitle>
-                    <CardDescription className="text-xs leading-relaxed">
-                      신규 PDF 또는 Word 계약서 문서를 업로드해 AI 법령 체크리스트 및 독소 배상 조항을 실시간 탐지해 보세요.
-                    </CardDescription>
-                  </CardHeader>
-                  
-                  {/* Interactive Upload Dropzone or Sequential Process Loading State */}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".pdf,.docx,.txt"
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
-                  <div 
-                    className="border border-slate-200 border-dashed rounded-xl p-5 bg-slate-50/50 text-center flex flex-col items-center justify-center cursor-pointer transition-all duration-300 hover:bg-slate-100/50 focus-within:ring-2 focus-within:ring-navy-800/20"
-                    onClick={handleUpload}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={handleDrop}
-                  >
-                    {isUploading ? (
-                      <div className="flex flex-col items-start w-full gap-3.5 py-2 px-1 select-none animate-slide-in">
-                        <div className="flex items-center gap-2 w-full">
-                          <RefreshCw className="w-4 h-4 text-navy-800 animate-spin shrink-0" />
-                          <span className="text-[11px] font-bold text-slate-700">AI 정밀 스크리닝 동작 중</span>
-                        </div>
-                        {/* Shimmering Timeline Steps */}
-                        <div className="space-y-3 w-full text-left">
-                          <div className="flex items-center gap-2">
-                            <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${
-                              uploadStep > 1 ? 'bg-emerald-500 text-white' : 'bg-navy-800 text-white animate-pulse'
-                            }`}>
-                              {uploadStep > 1 ? <Check className="w-2.5 h-2.5" /> : '1'}
-                            </span>
-                            <span className={`text-[10px] font-semibold transition-colors duration-300 ${uploadStep === 1 ? 'text-navy-800' : uploadStep > 1 ? 'text-slate-400' : 'text-slate-300'}`}>
-                              계약서 구조 파악 및 문서 벡터화
-                            </span>
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${
-                              uploadStep > 2 ? 'bg-emerald-500 text-white' : uploadStep === 2 ? 'bg-navy-800 text-white animate-pulse' : 'bg-slate-200 text-slate-500'
-                            }`}>
-                              {uploadStep > 2 ? <Check className="w-2.5 h-2.5" /> : '2'}
-                            </span>
-                            <span className={`text-[10px] font-semibold transition-colors duration-300 ${uploadStep === 2 ? 'text-navy-800' : uploadStep > 2 ? 'text-slate-400' : 'text-slate-300'}`}>
-                              법률 위반 및 표준 조항 대비 검색
-                            </span>
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${
-                              uploadStep > 3 ? 'bg-emerald-500 text-white' : uploadStep === 3 ? 'bg-navy-800 text-white animate-pulse' : 'bg-slate-200 text-slate-500'
-                            }`}>
-                              {uploadStep > 3 ? <Check className="w-2.5 h-2.5" /> : '3'}
-                            </span>
-                            <span className={`text-[10px] font-semibold transition-colors duration-300 ${uploadStep === 3 ? 'text-navy-800' : uploadStep > 3 ? 'text-slate-400' : 'text-slate-300'}`}>
-                              책임 한도액 및 면책 위험도 분류
-                            </span>
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${
-                              uploadStep > 4 ? 'bg-emerald-500 text-white' : uploadStep === 4 ? 'bg-navy-800 text-white animate-pulse' : 'bg-slate-200 text-slate-500'
-                            }`}>
-                              {uploadStep > 4 ? <Check className="w-2.5 h-2.5" /> : '4'}
-                            </span>
-                            <span className={`text-[10px] font-semibold transition-colors duration-300 ${uploadStep === 4 ? 'text-navy-800' : 'text-slate-300'}`}>
-                              AI 최적 수정 권고 조항 최종 검토
-                            </span>
-                          </div>
-                        </div>
-                        {/* Shimmer line bar */}
-                        <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden mt-1">
-                          <div className="bg-navy-800 h-full transition-all duration-300" style={{ width: `${(uploadStep - 1) * 25}%` }}></div>
-                        </div>
-                      </div>
-                    ) : uploadSuccess ? (
-                      <div className="flex flex-col items-center gap-2.5 py-8 animate-scale-in">
-                        <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-500 animate-pulse-ring">
-                          <Check className="w-6 h-6" />
-                        </div>
-                        <span className="text-xs font-bold text-slate-800">스크리닝 분석이 로드되었습니다!</span>
-                        {jobId && (
-                          <span className="text-[9px] text-slate-500 font-mono">job: {jobId.slice(0, 8)}…</span>
-                        )}
-                        <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
-                          Ready to Audit
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-6">
-                        <FileText className="w-10 h-10 text-slate-400 group-hover:text-navy-800 group-hover:scale-105 transition-all duration-300 mb-3" />
-                        <span className="text-xs font-bold text-slate-800">PDF, DOCX 계약서 문서 분석</span>
-                        <span className="text-[10px] text-slate-600 mt-1.5">클릭하거나 마우스로 드래그 앤 드롭</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-slate-100 mt-4 flex items-center gap-1.5 text-xs text-slate-600 font-medium">
-                  <Info className="w-3.5 h-3.5 text-navy-800 shrink-0" />
-                  <span>보안 규정: 민감 법률 정보 암호화 보관</span>
-                </div>
+          {/* API 스크리닝 보고서 (백엔드) */}
+          {apiScreening?.output_report && (
+            <div className="pt-2">
+              <Card variant="dashboard" className="p-5 border border-navy-100/80 bg-navy-50/30">
+                <CardHeader className="p-0 mb-3">
+                  <CardTitle className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                    <FileCheck className="w-4 h-4 text-navy-800" />
+                    API 스크리닝 보고서 (백엔드)
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    POST /api/screen 결과의 output_report 미리보기입니다.
+                  </CardDescription>
+                </CardHeader>
+                <pre className="text-[11px] leading-relaxed p-4 rounded-xl bg-white border border-slate-200 max-h-40 overflow-y-auto whitespace-pre-wrap font-sans text-slate-700">
+                  {apiScreening.output_report.slice(0, 2000)}
+                  {apiScreening.output_report.length > 2000 ? '…' : ''}
+                </pre>
               </Card>
             </div>
+          )}
 
-            {/* Right side: Detailed interactive report summary table (8 Cols) */}
-            <div className="lg:col-span-8 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="text-slate-900 font-bold text-lg flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-navy-800 animate-pulse-subtle" />
-                  실시간 스크리닝 리스크 검출 조항
-                </div>
-                
-                {/* Search Bar Input */}
-                <div className="relative max-w-xs w-full">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-                  <input
-                    type="text"
-                    placeholder="조항명, 카테고리, 요약 내용 검색..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full text-xs pl-9 pr-4 py-2 bg-white border border-slate-200/90 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy-800/10 focus:border-navy-800 transition-all duration-300 font-medium placeholder-slate-400 shadow-sm"
-                  />
-                </div>
+          {/* Interactive Screen: Detailed interactive report summary table (Taking full 12 Cols) */}
+          <div className="space-y-4 pt-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="text-slate-900 font-bold text-lg flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-navy-800 animate-pulse-subtle" />
+                실시간 스크리닝 리스크 검출 조항
               </div>
+              
+              {/* Search Bar Input */}
+              <div className="relative max-w-xs w-full">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                <input
+                  type="text"
+                  placeholder="조항명, 카테고리, 요약 내용 검색..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full text-xs pl-9 pr-4 py-2 bg-white border border-slate-200/90 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy-800/10 focus:border-navy-800 transition-all duration-300 font-medium placeholder-slate-400 shadow-sm"
+                />
+              </div>
+            </div>
 
-              {apiScreening?.output_report && (
-                <Card variant="dashboard" className="p-5 border border-navy-100/80 bg-navy-50/30">
-                  <CardHeader className="p-0 mb-3">
-                    <CardTitle className="text-sm font-bold text-slate-800 flex items-center gap-2">
-                      <FileCheck className="w-4 h-4 text-navy-800" />
-                      API 스크리닝 보고서 (백엔드)
-                    </CardTitle>
-                    <CardDescription className="text-xs">
-                      POST /api/screen 결과의 output_report 미리보기입니다.
-                    </CardDescription>
-                  </CardHeader>
-                  <pre className="text-[11px] leading-relaxed p-4 rounded-xl bg-white border border-slate-200 max-h-40 overflow-y-auto whitespace-pre-wrap font-sans text-slate-700">
-                    {apiScreening.output_report.slice(0, 2000)}
-                    {apiScreening.output_report.length > 2000 ? '…' : ''}
-                  </pre>
-                </Card>
-              )}
+            {/* Risky Clauses Table */}
+            <div className="overflow-hidden bg-white border border-slate-200/90 rounded-2xl shadow-sm">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-2/5">검출 조항</TableHead>
+                    <TableHead>위험 수준</TableHead>
+                    <TableHead>분야</TableHead>
+                    <TableHead className="text-right">상세 분석</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredRisksList.map((risk) => {
+                    const block = blocks.find(b => b.riskId === risk.id);
+                    const isResolved = block?.isResolved;
 
-              {/* Risky Clauses Table */}
-              <div className="overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-2/5">검출 조항 (Clause)</TableHead>
-                      <TableHead>위험 수준</TableHead>
-                      <TableHead>분야 (Category)</TableHead>
-                      <TableHead className="text-right">스크리닝 Audit</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredRisksList.map((risk) => {
-                      const block = blocks.find(b => b.riskId === risk.id);
-                      const isResolved = block?.isResolved;
-
-                      return (
-                        <TableRow 
-                          key={risk.id} 
-                          className={`transition-all duration-300 cursor-pointer ${
-                            isResolved 
-                              ? 'bg-emerald-50/20 hover:bg-emerald-50/30' 
-                              : selectedRiskId === risk.id 
-                                ? 'bg-slate-50/90 font-medium' 
-                                : 'hover:bg-slate-50/50'
-                          }`}
-                          onClick={() => {
-                            setSelectedRiskId(risk.id);
-                            setActiveTab('viewer');
-                          }}
-                        >
-                          <TableCell className="font-semibold text-slate-900 py-3.5">
-                            <div className="flex items-center gap-2.5">
-                              {isResolved ? (
-                                <div className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 shrink-0">
-                                  <Check className="w-3.5 h-3.5" />
-                                </div>
-                              ) : (
-                                <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
-                                  risk.severity === 'high' ? 'bg-rose-50 border border-rose-100 text-rose-500' :
-                                  risk.severity === 'medium' ? 'bg-amber-50 border border-amber-100 text-amber-500' :
-                                  'bg-slate-50 border border-slate-200 text-slate-500'
-                                }`}>
-                                  <AlertTriangle className="w-3 h-3" />
-                                </div>
-                              )}
-                              <span>{risk.clauseName}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
+                    return (
+                      <TableRow 
+                        key={risk.id} 
+                        className={`transition-all duration-300 cursor-pointer ${
+                          isResolved 
+                            ? 'bg-emerald-50/20 hover:bg-emerald-50/30' 
+                            : selectedRiskId === risk.id 
+                              ? 'bg-slate-50/90 font-medium' 
+                              : 'hover:bg-slate-50/50'
+                        }`}
+                        onClick={() => {
+                          setSelectedRiskId(risk.id);
+                          setActiveTab('viewer');
+                        }}
+                      >
+                        <TableCell className="font-semibold text-slate-900 py-3.5">
+                          <div className="flex items-center gap-2.5">
                             {isResolved ? (
-                              <Badge variant="low">조치 완료</Badge>
+                              <div className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 shrink-0">
+                                <Check className="w-3.5 h-3.5" />
+                              </div>
                             ) : (
-                              <Badge variant={risk.severity}>{
-                                risk.severity === 'high' ? '고위험' :
-                                risk.severity === 'medium' ? '중위험' : '저위험'
-                              }</Badge>
+                              <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+                                risk.severity === 'high' ? 'bg-rose-50 border border-rose-100 text-rose-500' :
+                                risk.severity === 'medium' ? 'bg-amber-50 border border-amber-100 text-amber-500' :
+                                'bg-slate-50 border border-slate-200 text-slate-500'
+                              }`}>
+                                <AlertTriangle className="w-3 h-3" />
+                              </div>
                             )}
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-[11px] text-slate-600 font-semibold bg-slate-100 border border-slate-200/50 px-2.5 py-0.5 rounded-md">
-                              {risk.category}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedRiskId(risk.id);
-                                setActiveTab('viewer');
-                              }}
-                              className="inline-flex items-center gap-1 text-xs font-bold text-navy-800 hover:text-navy-900 transition-colors group/act cursor-pointer"
-                            >
-                              {koreanHeadings.viewDetails}
-                              <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover/act:translate-x-0.5" />
-                            </button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                    {filteredRisksList.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={4} className="text-center py-12 text-slate-600 font-medium">
-                          검색 요건에 매칭되는 계약 조항 리스크 요인이 검출되지 않았습니다.
+                            <span>{risk.clauseName}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {isResolved ? (
+                            <Badge variant="low">조치 완료</Badge>
+                          ) : (
+                            <Badge variant={risk.severity}>{
+                              risk.severity === 'high' ? '고위험' :
+                              risk.severity === 'medium' ? '중위험' : '저위험'
+                            }</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-[11px] text-slate-600 font-semibold bg-slate-100 border border-slate-200/50 px-2.5 py-0.5 rounded-md">
+                            {risk.category}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedRiskId(risk.id);
+                              setActiveTab('viewer');
+                            }}
+                            className="inline-flex items-center gap-1 text-xs font-bold text-navy-800 hover:text-navy-900 transition-colors group/act cursor-pointer"
+                          >
+                            {koreanHeadings.viewDetails}
+                            <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover/act:translate-x-0.5" />
+                          </button>
                         </TableCell>
                       </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
+                    );
+                  })}
+                  {filteredRisksList.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-12 text-slate-600 font-medium">
+                        검색 요건에 매칭되는 계약 조항 리스크 요인이 검출되지 않았습니다.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
             </div>
           </div>
         </div>
@@ -775,7 +858,7 @@ export const Dashboard: React.FC = () => {
           )}
         <div className="grid lg:grid-cols-12 gap-8 items-start">
           
-          {/* LEFT PANE: Premium Legal Document Reader Container (p-8 Padding) */}
+          {/* LEFT PANE: Premium Legal Document Reader Container */}
           <div className="lg:col-span-7 bg-white border border-slate-200/90 rounded-2xl shadow-sm overflow-hidden flex flex-col h-[740px]">
             {/* Pane Header */}
             <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/75 flex items-center justify-between">
@@ -784,7 +867,7 @@ export const Dashboard: React.FC = () => {
                   <FileText className="w-4 h-4" />
                 </div>
                 <span className="text-xs font-bold text-slate-700 uppercase font-mono select-none">
-                  {isLiveData ? contract.title : 'Mutual_NDA_Redlined.txt'}
+                  {isLiveData ? `${contract.title} (${jobId || ''})` : '상호비밀유지계약서_검토본.txt'}
                 </span>
               </div>
               <div className="text-[11px] text-slate-600 font-semibold flex items-center gap-3">
@@ -875,7 +958,7 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* RIGHT PANE: AI Redlining Feed Panel (p-6 Padding) */}
+          {/* RIGHT PANE: AI Redlining Feed Panel */}
           <div className="lg:col-span-5 space-y-6">
             <Card variant="dashboard" className="border-l-4 border-l-navy-800 shadow-md radial-glow-navy p-6 flex flex-col justify-between">
               
@@ -883,7 +966,7 @@ export const Dashboard: React.FC = () => {
                 <CardHeader className="pb-3 border-b border-slate-100 p-0 mb-0">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-[10px] bg-navy-800/10 text-navy-800 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider border border-navy-800/10">
-                      AI Legal Audit feed
+                      AI 법률 분석 피드
                     </span>
                     
                     {selectedBlock?.isResolved ? (
@@ -923,7 +1006,7 @@ export const Dashboard: React.FC = () => {
                 {/* Compare Clause Box with View Mode Slider Selector */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-700">비교 스크린 모드</span>
+                    <span className="text-xs font-bold text-slate-700">비교 모드</span>
                     {/* Segmented control for diff views */}
                     <div className="inline-flex items-center p-0.5 bg-slate-100 rounded-lg border border-slate-200 shadow-inner">
                       <button
@@ -934,7 +1017,7 @@ export const Dashboard: React.FC = () => {
                             : 'text-slate-500 hover:text-slate-900'
                         }`}
                       >
-                        양자 비교 (Side)
+                        좌우 비교
                       </button>
                       <button
                         onClick={() => setDiffViewMode('redline')}
@@ -944,7 +1027,7 @@ export const Dashboard: React.FC = () => {
                             : 'text-slate-500 hover:text-slate-900'
                         }`}
                       >
-                        AI 레드라인 (Inline Diff)
+                        레드라인 비교
                       </button>
                     </div>
                   </div>
@@ -979,7 +1062,7 @@ export const Dashboard: React.FC = () => {
                     <div className="space-y-1.5 animate-slide-in">
                       <span className="text-[10px] font-extrabold text-navy-800 uppercase tracking-wide flex items-center gap-1 select-none">
                         <Sparkles className="w-3.5 h-3.5 text-navy-800 shrink-0" />
-                        AI 자동 수정 권고 레드라인 (Word-level Redline)
+                        AI 자동 수정 권고 레드라인 (단어 비교)
                       </span>
                       {selectedRisk && selectedBlock && renderWordDiff(selectedBlock.originalText || '', selectedRisk.recommendation)}
                     </div>
@@ -994,7 +1077,7 @@ export const Dashboard: React.FC = () => {
                       className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs font-bold py-2.5 px-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 border border-slate-200 shadow-sm cursor-pointer active:scale-98"
                     >
                       <Undo className="w-3.5 h-3.5" />
-                      원래 조항으로 복원
+                      원본 조항으로 복원
                     </button>
                   ) : (
                     selectedRisk && (
@@ -1003,7 +1086,7 @@ export const Dashboard: React.FC = () => {
                         className="w-full bg-navy-800 hover:bg-navy-900 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-sm transition-all duration-300 hover:shadow flex items-center justify-center gap-1.5 animate-pulse-subtle cursor-pointer active:scale-98"
                       >
                         <FileCheck className="w-3.5 h-3.5" />
-                        AI 추천 권고안 적용 (Direct Redline)
+                        AI 수정 권고안 본문 반영
                       </button>
                     )
                   )}
@@ -1035,7 +1118,8 @@ export const Dashboard: React.FC = () => {
                               selectedRisk.remedyCost === 'High' ? 'high' :
                               selectedRisk.remedyCost === 'Medium' ? 'medium' : 'low'
                             }>
-                              {selectedRisk.remedyCost} Risk
+                              {selectedRisk.remedyCost === 'High' ? '난이도 상' :
+                               selectedRisk.remedyCost === 'Medium' ? '난이도 중' : '난이도 하'}
                             </Badge>
                           </div>
                         </div>
@@ -1050,7 +1134,7 @@ export const Dashboard: React.FC = () => {
                 onClick={() => setActiveTab('overview')}
                 className="text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1 transition-colors pl-1 pt-6 cursor-pointer"
               >
-                ← {koreanHeadings.backToDashboard}
+                ← 분석 요약으로 돌아가기
               </button>
 
             </Card>
