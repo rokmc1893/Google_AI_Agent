@@ -352,7 +352,16 @@ export const Dashboard: React.FC = () => {
               <div 
                 className="border border-slate-200 border-dashed rounded-2xl p-6 bg-slate-50/50 text-center flex flex-col items-center justify-center cursor-pointer transition-all duration-300 hover:bg-slate-100/50 focus-within:ring-2 focus-within:ring-navy-800/20"
                 onClick={handleUpload}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleDrop}
               >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.docx,.txt"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
                 {isUploading ? (
                   <div className="flex flex-col items-start w-full gap-4 py-2 px-1 select-none animate-slide-in">
                     <div className="flex items-center gap-2 w-full justify-center">
@@ -858,7 +867,7 @@ export const Dashboard: React.FC = () => {
                   <FileText className="w-4 h-4" />
                 </div>
                 <span className="text-xs font-bold text-slate-700 uppercase font-mono select-none">
-                  {isLiveData ? contract.title : '상호비밀유지계약서_검토본.txt'}
+                  {isLiveData ? `${contract.title} (${jobId || ''})` : '상호비밀유지계약서_검토본.txt'}
                 </span>
               </div>
               <div className="text-[11px] text-slate-600 font-semibold flex items-center gap-3">
