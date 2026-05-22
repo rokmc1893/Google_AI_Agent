@@ -1,0 +1,40 @@
+# ── Core Document Processing ──────────────────────────────────────────────────
+pdfplumber>=0.10.3
+python-docx>=1.1.0
+PyMuPDF>=1.24.0          # fitz: 손상 PDF 감지용
+
+# ── NLP / NER ─────────────────────────────────────────────────────────────────
+spacy>=3.7.4
+# 설치 후 모델 다운로드 필요: python -m spacy download ko_core_news_lg
+
+# ── Vector Search & BM25 ──────────────────────────────────────────────────────
+faiss-cpu>=1.8.0
+rank-bm25>=0.2.2
+numpy>=1.26.0
+
+# ── LLM / Agent Framework ─────────────────────────────────────────────────────
+langchain>=0.2.14
+langgraph>=0.1.19
+langchain-openai>=0.1.22
+langchain-community>=0.2.14
+openai>=1.35.0
+
+# ── Embedding ─────────────────────────────────────────────────────────────────
+sentence-transformers>=3.0.0
+
+# ── Testing ───────────────────────────────────────────────────────────────────
+pytest>=8.2.0
+pytest-asyncio>=0.23.7
+pytest-mock>=3.14.0
+pytest-cov>=5.0.0
+factory-boy>=3.3.0
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+python-dotenv>=1.0.1
+pydantic>=2.7.0
+tenacity>=8.3.0          # 재시도 로직
+
+# ── Database (Option B) ───────────────────────────────────────────────────────
+psycopg2-binary>=2.9.9
+pgvector>=0.2.5
+
