@@ -1,0 +1,33 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    env_file:
+      - .env
+    environment:
+      - CORS_ORIGINS=http://localhost,http://127.0.0.1,http://localhost:8080
+      - CHROMA_DIR=/app/backend/data/chroma
+    volumes:
+      - chroma_data:/app/backend/data/chroma
+      - upload_data:/app/backend/data/uploads
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  chroma_data:
+  upload_data:
