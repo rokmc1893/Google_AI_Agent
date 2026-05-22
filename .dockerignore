@@ -1,0 +1,12 @@
+node_modules
+dist
+.venv
+__pycache__
+*.pyc
+.env
+.git
+backend/data/chroma
+backend/data/uploads
+.cursor
+*.md
+!README.md

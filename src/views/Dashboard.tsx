@@ -1,9 +1,17 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import type { ScreeningResult } from '../api/client';
+import { MaskingCompare } from '../components/MaskingCompare';
+import { useScreeningMutation } from '../hooks/useScreening';
+import {
+  buildBlocksFromContract,
+  mapResultToContractData,
+  type ContractBlock,
+} from '../lib/mapScreeningResult';
+import { sampleContract, koreanHeadings, type ContractData } from '../mockData/sampleContract';
 import { Card, CardHeader, CardTitle, CardDescription } from '../components/Card';
 import { Badge } from '../components/Badge';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../components/Table';
 import { Accordion, AccordionItem } from '../components/Accordion';
-import { sampleContract, koreanHeadings } from '../mockData/sampleContract';
 import { 
   AlertTriangle, 
   FileText, 
@@ -21,15 +29,6 @@ import {
   Activity,
   ShieldAlert
 } from 'lucide-react';
-
-interface ContractBlock {
-  id: string;
-  text: string;
-  isRisk: boolean;
-  riskId?: string;
-  isResolved?: boolean;
-  originalText?: string;
-}
 
 // Client-side lightweight word-level LCS (Longest Common Subsequence) diff utility
 function computeWordDiff(str1: string, str2: string) {
@@ -122,39 +121,73 @@ export const Dashboard: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadStep, setUploadStep] = useState<number>(0);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [apiContract, setApiContract] = useState<ContractData | null>(null);
+  const [apiScreening, setApiScreening] = useState<ScreeningResult | null>(null);
+  const screeningMutation = useScreeningMutation();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const contract: ContractData = apiContract ?? sampleContract;
+  const isLiveData = Boolean(apiContract && apiScreening);
   const [diffViewMode, setDiffViewMode] = useState<'side-by-side' | 'redline'>('redline');
   const [shineBlockId, setShineBlockId] = useState<string | null>(null);
 
   // Stateful text blocks for direct interactive redlining
   const [blocks, setBlocks] = useState<ContractBlock[]>(INITIAL_BLOCKS);
 
-  // Handle mock uploading file with sequential, multi-stage loading timeline
-  const handleUpload = () => {
+  const finishUploadUi = () => {
+    setUploadStep(5);
+    setIsUploading(false);
+    setUploadSuccess(true);
+    setTimeout(() => {
+      setUploadSuccess(false);
+      setUploadStep(0);
+    }, 3000);
+  };
+
+  const runUploadFlow = async (file: File) => {
     if (isUploading) return;
     setIsUploading(true);
     setUploadStep(1);
-    
-    // Animate step 1 to 4 with staggered timers
-    setTimeout(() => {
+    setUploadSuccess(false);
+    try {
       setUploadStep(2);
-      setTimeout(() => {
-        setUploadStep(3);
-        setTimeout(() => {
-          setUploadStep(4);
-          setTimeout(() => {
-            setUploadStep(5); // finished analysis
-            setIsUploading(false);
-            setUploadSuccess(true);
-            setTimeout(() => {
-              setUploadSuccess(false);
-              setUploadStep(0);
-              setIsAnalyzed(true);
-              setActiveTab('overview');
-            }, 1200);
-          }, 950);
-        }, 800);
-      }, 750);
-    }, 850);
+      const data = await screeningMutation.mutateAsync(file);
+      setUploadStep(3);
+      setJobId(data.upload.job_id);
+      setApiScreening(data.screening);
+      const mapped = mapResultToContractData(data.screening, data.uploadMeta);
+      setApiContract(mapped);
+      setBlocks(buildBlocksFromContract(mapped));
+      if (mapped.risks[0]) setSelectedRiskId(mapped.risks[0].id);
+      console.log('[Deepgle] screening result', data.screening);
+      setUploadStep(4);
+      finishUploadUi();
+      setIsAnalyzed(true);
+      setActiveTab('overview');
+    } catch (err) {
+      console.error('[Deepgle] upload/screen failed', err);
+      setIsUploading(false);
+      setUploadStep(0);
+      alert(err instanceof Error ? err.message : '업로드 또는 스크리닝에 실패했습니다.');
+    }
+  };
+
+  const handleUpload = () => {
+    if (isUploading) return;
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) void runUploadFlow(file);
+    e.target.value = '';
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (isUploading) return;
+    const file = e.dataTransfer.files?.[0];
+    if (file) void runUploadFlow(file);
   };
 
   // Reset to home view to analyze another contract
@@ -207,22 +240,26 @@ export const Dashboard: React.FC = () => {
   };
 
   // Calculate current risk stats
-  const activeRisks = sampleContract.risks.filter(r => {
+  const activeRisks = contract.risks.filter(r => {
     const block = blocks.find(b => b.riskId === r.id);
     return block && !block.isResolved;
   });
 
   const resolvedCount = blocks.filter(b => b.isRisk && b.isResolved).length;
   
-  const highRiskCount = activeRisks.filter(r => r.severity === 'high').length;
-  const mediumRiskCount = activeRisks.filter(r => r.severity === 'medium').length;
-  const lowRiskCount = activeRisks.filter(r => r.severity === 'low').length;
+  const highRiskCount =
+    apiScreening?.high_risk_count ?? activeRisks.filter(r => r.severity === 'high').length;
+  const mediumRiskCount =
+    apiScreening?.medium_risk_count ?? activeRisks.filter(r => r.severity === 'medium').length;
+  const lowRiskCount =
+    apiScreening?.low_risk_count ?? activeRisks.filter(r => r.severity === 'low').length;
 
   // Dynamically compute the Safety Score / Risk Index
   // Deduct 25 for each High Risk, 12 for Medium Risk, 5 for Low Risk
   const maxScore = 100;
   const penalty = (highRiskCount * 25) + (mediumRiskCount * 12) + (lowRiskCount * 5);
-  const safetyScore = Math.max(0, maxScore - penalty);
+  const safetyScore =
+    apiScreening?.safety_score ?? Math.max(0, maxScore - penalty);
 
   // SVG Radial Gauge Metrics
   const radius = 42;
@@ -239,11 +276,11 @@ export const Dashboard: React.FC = () => {
 
   const scoreInfo = getScoreInfo(safetyScore);
 
-  const selectedRisk = sampleContract.risks.find(r => r.id === selectedRiskId);
+  const selectedRisk = contract.risks.find(r => r.id === selectedRiskId);
   const selectedBlock = blocks.find(b => b.riskId === selectedRiskId);
 
   // Search filter
-  const filteredRisksList = sampleContract.risks.filter(r => {
+  const filteredRisksList = contract.risks.filter(r => {
     const query = searchTerm.toLowerCase();
     return r.clauseName.toLowerCase().includes(query) || 
            r.summary.toLowerCase().includes(query) || 
@@ -576,13 +613,16 @@ export const Dashboard: React.FC = () => {
               
               <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold">
                 <span className="text-slate-600">
-                  AI 권고안 반영률: <span className="text-navy-800 font-bold">{resolvedCount} / {sampleContract.risks.length} 건</span>
+                  AI 권고안 반영률: <span className="text-navy-800 font-bold">{resolvedCount} / {contract.risks.length} 건</span>
+                  {isLiveData && (
+                    <span className="ml-2 text-[10px] text-emerald-700 font-bold">· API 연동</span>
+                  )}
                 </span>
                 {safetyScore < 100 && (
                   <button 
                     onClick={() => {
                       // Navigate directly to viewer with high risk selected
-                      const firstActive = activeRisks[0] || sampleContract.risks[0];
+                      const firstActive = activeRisks[0] || contract.risks[0];
                       setSelectedRiskId(firstActive.id);
                       setActiveTab('viewer');
                     }}
@@ -661,6 +701,27 @@ export const Dashboard: React.FC = () => {
             </div>
 
           </div>
+
+          {/* API 스크리닝 보고서 (백엔드) */}
+          {apiScreening?.output_report && (
+            <div className="pt-2">
+              <Card variant="dashboard" className="p-5 border border-navy-100/80 bg-navy-50/30">
+                <CardHeader className="p-0 mb-3">
+                  <CardTitle className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                    <FileCheck className="w-4 h-4 text-navy-800" />
+                    API 스크리닝 보고서 (백엔드)
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    POST /api/screen 결과의 output_report 미리보기입니다.
+                  </CardDescription>
+                </CardHeader>
+                <pre className="text-[11px] leading-relaxed p-4 rounded-xl bg-white border border-slate-200 max-h-40 overflow-y-auto whitespace-pre-wrap font-sans text-slate-700">
+                  {apiScreening.output_report.slice(0, 2000)}
+                  {apiScreening.output_report.length > 2000 ? '…' : ''}
+                </pre>
+              </Card>
+            </div>
+          )}
 
           {/* Interactive Screen: Detailed interactive report summary table (Taking full 12 Cols) */}
           <div className="space-y-4 pt-2">
@@ -779,7 +840,14 @@ export const Dashboard: React.FC = () => {
 
       {/* VIEW 2: HIGH-FIDELITY SCREENING VIEWER */}
       {activeTab === 'viewer' && (
-        <div className="grid lg:grid-cols-12 gap-8 animate-fade-in-up items-start">
+        <div className="space-y-6 animate-fade-in-up">
+          {apiScreening?.contract_masked && (
+            <MaskingCompare
+              originalText={contract.fullText}
+              maskedText={apiScreening.contract_masked}
+            />
+          )}
+        <div className="grid lg:grid-cols-12 gap-8 items-start">
           
           {/* LEFT PANE: Premium Legal Document Reader Container */}
           <div className="lg:col-span-7 bg-white border border-slate-200/90 rounded-2xl shadow-sm overflow-hidden flex flex-col h-[740px]">
@@ -789,7 +857,9 @@ export const Dashboard: React.FC = () => {
                 <div className="w-7 h-7 rounded-lg bg-navy-50 flex items-center justify-center text-navy-800 border border-navy-100">
                   <FileText className="w-4 h-4" />
                 </div>
-                <span className="text-xs font-bold text-slate-700 uppercase font-mono select-none">상호비밀유지계약서_검토본.txt</span>
+                <span className="text-xs font-bold text-slate-700 uppercase font-mono select-none">
+                  {isLiveData ? contract.title : '상호비밀유지계약서_검토본.txt'}
+                </span>
               </div>
               <div className="text-[11px] text-slate-600 font-semibold flex items-center gap-3">
                 <span className="flex items-center gap-1.5">
@@ -818,7 +888,7 @@ export const Dashboard: React.FC = () => {
                   );
                 }
 
-                const risk = sampleContract.risks.find(r => r.id === block.riskId);
+                const risk = contract.risks.find(r => r.id === block.riskId);
                 const isSelected = selectedRiskId === block.riskId;
                 const isShining = shineBlockId === block.riskId;
                 
@@ -1060,6 +1130,7 @@ export const Dashboard: React.FC = () => {
 
             </Card>
           </div>
+        </div>
         </div>
       )}
     </div>

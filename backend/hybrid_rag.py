@@ -1,5 +1,6 @@
 import math
-from typing import List, Dict, Any
+import re
+from typing import Any, Dict, List, Tuple
 
 # 모의 법률/규정 데이터베이스 (하도급법, 민법, 사내 표준 계약 가이드라인)
 LAW_DATABASE = [
@@ -79,10 +80,41 @@ class HybridRAG:
                 score += 1.0
         return score
 
+    def _retrieve_chroma(self, query: str, top_k: int) -> List[Dict[str, Any]]:
+        try:
+            from backend.config import get_settings
+            from backend.rag.status import get_rag_status
+            from backend.rag.vector_store import search_similar_chunks
+
+            if not get_settings().rag_enabled:
+                return []
+            enabled, _, _ = get_rag_status()
+            if not enabled:
+                return []
+            hits = search_similar_chunks(query, top_k=top_k)
+            docs: List[Dict[str, Any]] = []
+            for hit in hits:
+                meta = hit.get("metadata", {})
+                docs.append({
+                    "id": meta.get("id", hit.get("id", "RAG_HIT")),
+                    "category": meta.get("category", meta.get("filename", "RAG")),
+                    "clause": meta.get("clause", "검색 조항"),
+                    "content": hit.get("content", ""),
+                    "keywords": [],
+                    "score": hit.get("score", 0),
+                })
+            return docs
+        except Exception:
+            return []
+
     def retrieve(self, query: str, top_k: int = 2) -> List[Dict[str, Any]]:
         """
-        하이브리드(키워드 스코어 + 맥락 유사도) 방식으로 가장 유관한 법령/사내 지침을 검색합니다.
+        하이브리드(Chroma semantic + 키워드/자카드) 방식으로 유관 법령/규정 검색.
         """
+        chroma_docs = self._retrieve_chroma(query, top_k)
+        if chroma_docs:
+            return chroma_docs[:top_k]
+
         query_tokens = self._tokenize(query)
         results = []
 
