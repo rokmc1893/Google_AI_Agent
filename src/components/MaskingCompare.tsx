@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardDescription, CardHeader, CardTitle } from './Card';
-import { koreanHeadings } from '../mockData/sampleContract';
+import { koreanHeadings } from '../constants/uiLabels';
 
 interface MaskingCompareProps {
   originalText: string;

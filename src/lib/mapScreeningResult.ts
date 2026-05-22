@@ -1,5 +1,5 @@
 import type { ScreeningResult } from '../api/client';
-import type { ContractData, LegalRisk } from '../mockData/sampleContract';
+import type { ContractData, LegalRisk } from '../types/contract';
 
 export interface UploadMeta {
   filename: string;

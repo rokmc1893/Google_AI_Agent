@@ -7,7 +7,8 @@ import {
   mapResultToContractData,
   type ContractBlock,
 } from '../lib/mapScreeningResult';
-import { sampleContract, koreanHeadings, type ContractData } from '../mockData/sampleContract';
+import { koreanHeadings } from '../constants/uiLabels';
+import type { ContractData } from '../types/contract';
 import { Card, CardHeader, CardTitle, CardDescription } from '../components/Card';
 import { Badge } from '../components/Badge';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../components/Table';
@@ -68,71 +69,23 @@ function computeWordDiff(str1: string, str2: string) {
   return diff;
 }
 
-const INITIAL_BLOCKS: ContractBlock[] = [
-  { 
-    id: 'intro', 
-    text: `상호 비밀유지계약서 (Mutual NDA)\n\n본 상호 비밀유지계약서(이하 "본 계약")는 주식회사 딥글디자인(이하 "갑")과 글로벌벤처스 주식회사(이하 "을") 간에 체결되었습니다.\n\n제1조 (목적 및 비밀정보)\n양 당사자는 공동 사업 기회 모색(이하 "본 목적")을 희망합니다. 본 목적과 관련하여 양 당사자는 서면, 구두 또는 시각적 형태로 공개되는 독점적이고 민감한 정보로서 비밀로 표시되거나 성질상 비밀로 합리적으로 이해되어야 하는 정보(이하 "비밀정보")를 상대방에게 공개할 수 있습니다.\n\n제2조 (비밀유지 의무 및 사용 제한)\n비밀정보를 수령한 당사자(이하 "수령인")는 제공 당사자(이하 "공개자")의 비밀정보가 무단으로 공개되거나 사용되지 않도록 신의성실의 의무를 다하고, 합리적인 수준 이상의 주의를 기울여 비밀정보를 관리하여야 합니다. 수령인은 본 목적을 위해서만 비밀정보를 사용하여야 합니다.`,
-    isRisk: false 
-  },
-  { 
-    id: 'risk-1', 
-    text: `제3조 (일방적 영구 비밀유지 의무)\n본 계약의 해지 또는 만료 여부에 관계없이, 본 계약에 따라 공개된 모든 비밀정보에 대한 수령인의 비밀유지 의무는 공개일로부터 영구적으로 존속합니다. 수령인은 해당 정보가 거래상의 비밀에 해당하지 않게 되거나, 수령인의 귀책 사유 없이 공공 영역에 공개되는지 여부와 관계없이 본 계약에 따른 모든 비밀유지 의무가 무기한 효력을 유지한다는 것에 동의합니다.`, 
-    isRisk: true, 
-    riskId: 'risk-1',
-    isResolved: false,
-    originalText: `제3조 (일방적 영구 비밀유지 의무)\n본 계약의 해지 또는 만료 여부에 관계없이, 본 계약에 따라 공개된 모든 비밀정보에 대한 수령인의 비밀유지 의무는 공개일로부터 영구적으로 존속합니다. 수령인은 해당 정보가 거래상의 비밀에 해당하지 않게 되거나, 수령인의 귀책 사유 없이 공공 영역에 공개되는지 여부와 관계없이 본 계약에 따른 모든 비밀유지 의무가 무기한 효력을 유지한다는 것에 동의합니다.`
-  },
-  { 
-    id: 'risk-2', 
-    text: `제4조 (손해배상 및 무제한 책임)\n수령인은 수령인의 본 계약 위반으로 인해 발생하거나 이와 관련하여 발생하는 모든 청구, 부채, 손실, 손해, 비용 또는 지출(합리적인 변호사 수임료 포함)로부터 공개자를 면책하고 방어하며 피해가 없도록 하는 것에 동의합니다. 또한 수령인은 본 제4조에 따른 책임을 전적으로 무제한으로 부담하며, 다른 합의사항에 따른 책임 제한이나 한도의 적용을 받지 않는다는 것에 동의합니다.`, 
-    isRisk: true, 
-    riskId: 'risk-2',
-    isResolved: false,
-    originalText: `제4조 (손해배상 및 무제한 책임)\n수령인은 수령인의 본 계약 위반으로 인해 발생하거나 이와 관련하여 발생하는 모든 청구, 부채, 손실, 손해, 비용 또는 지출(합리적인 변호사 수임료 포함)로부터 공개자를 면책하고 방어하며 피해가 없도록 하는 것에 동의합니다. 또한 수령인은 본 제4조에 따른 책임을 전적으로 무제한으로 부담하며, 다른 합의사항에 따른 책임 제한이나 한도의 적용을 받지 않는다는 것에 동의합니다.`
-  },
-  { 
-    id: 'risk-3', 
-    text: `제5조 (지식재산권 소유권 및 자동 양도)\n모든 비밀정보는 공개자의 단독 소유로 유지됩니다. 다만, 수령인이 본 계약 기간 동안 공개자의 기술 또는 사업에 대한 피드백, 개선 사항 또는 수정 제안을 제공하는 경우, 수령인은 추가적인 대가나 보상 없이 해당 피드백과 관련된 모든 권리, 권원, 지식재산권을 공개자에게 자동으로 그리고 취소 불가능하게 양도합니다.`, 
-    isRisk: true, 
-    riskId: 'risk-3',
-    isResolved: false,
-    originalText: `제5조 (지식재산권 소유권 및 자동 양도)\n모든 비밀정보는 공개자의 단독 소유로 유지됩니다. 다만, 수령인이 본 계약 기간 동안 공개자의 기술 또는 사업에 대한 피드백, 개선 사항 또는 수정 제안을 제공하는 경우, 수령인은 추가적인 대가나 보상 없이 해당 피드백과 관련된 모든 권리, 권원, 지식재산권을 공개자에게 자동으로 그리고 취소 불가능하게 양도합니다.`
-  },
-  { 
-    id: 'risk-4', 
-    text: `제6조 (준거법 및 관할합의)\n본 계약 및 이와 관련하여 발생하는 모든 청구 또는 소송 제기는 법률 저촉 원칙과 관계없이 대한민국 법률에 따라 해석되고 규율됩니다. 본 계약으로 인해 발생하거나 이와 관련된 모든 법적 소송 또는 절차는 서울중앙지방법원을 제1심 전속적 합의관할법원으로 지정합니다.`, 
-    isRisk: true, 
-    riskId: 'risk-4',
-    isResolved: false,
-    originalText: `제6조 (준거법 및 관할합의)\n본 계약 및 이와 관련하여 발생하는 모든 청구 또는 소송 제기는 법률 저촉 원칙과 관계없이 대한민국 법률에 따라 해석되고 규율됩니다. 본 계약으로 인해 발생하거나 이와 관련된 모든 법적 소송 또는 절차는 서울중앙지방법원을 제1심 전속적 합의관할법원으로 지정합니다.`
-  },
-  { 
-    id: 'outro', 
-    text: `\n본 계약의 체결을 증명하기 위해 양 당사자는 대표자를 통해 본 계약서를 작성하고 서명 날인합니다.`, 
-    isRisk: false 
-  }
-];
-
 export const Dashboard: React.FC = () => {
   const [isAnalyzed, setIsAnalyzed] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'viewer'>('overview');
-  const [selectedRiskId, setSelectedRiskId] = useState<string>('risk-2'); // default highlight high risk
+  const [selectedRiskId, setSelectedRiskId] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadStep, setUploadStep] = useState<number>(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const [apiContract, setApiContract] = useState<ContractData | null>(null);
   const [apiScreening, setApiScreening] = useState<ScreeningResult | null>(null);
   const screeningMutation = useScreeningMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const contract: ContractData = apiContract ?? sampleContract;
-  const isLiveData = Boolean(apiContract && apiScreening);
   const [diffViewMode, setDiffViewMode] = useState<'side-by-side' | 'redline'>('redline');
   const [shineBlockId, setShineBlockId] = useState<string | null>(null);
-
-  // Stateful text blocks for direct interactive redlining
-  const [blocks, setBlocks] = useState<ContractBlock[]>(INITIAL_BLOCKS);
+  const [blocks, setBlocks] = useState<ContractBlock[]>([]);
 
   const finishUploadUi = () => {
     setUploadStep(5);
@@ -149,6 +102,7 @@ export const Dashboard: React.FC = () => {
     setIsUploading(true);
     setUploadStep(1);
     setUploadSuccess(false);
+    setUploadError(null);
     try {
       setUploadStep(2);
       const data = await screeningMutation.mutateAsync(file);
@@ -168,7 +122,9 @@ export const Dashboard: React.FC = () => {
       console.error('[Deepgle] upload/screen failed', err);
       setIsUploading(false);
       setUploadStep(0);
-      alert(err instanceof Error ? err.message : '업로드 또는 스크리닝에 실패했습니다.');
+      setUploadError(
+        err instanceof Error ? err.message : '업로드 또는 스크리닝에 실패했습니다.',
+      );
     }
   };
 
@@ -193,11 +149,16 @@ export const Dashboard: React.FC = () => {
   // Reset to home view to analyze another contract
   const handleReset = () => {
     setIsAnalyzed(false);
-    setBlocks(INITIAL_BLOCKS);
-    setSelectedRiskId('risk-2');
+    setApiContract(null);
+    setApiScreening(null);
+    setJobId(null);
+    setBlocks([]);
+    setSelectedRiskId('');
     setSearchTerm('');
     setUploadStep(0);
     setUploadSuccess(false);
+    setUploadError(null);
+    screeningMutation.reset();
   };
 
   // Direct edit: apply AI recommendation to the document block text
@@ -239,84 +200,6 @@ export const Dashboard: React.FC = () => {
     }));
   };
 
-  // Calculate current risk stats
-  const activeRisks = contract.risks.filter(r => {
-    const block = blocks.find(b => b.riskId === r.id);
-    return block && !block.isResolved;
-  });
-
-  const resolvedCount = blocks.filter(b => b.isRisk && b.isResolved).length;
-  
-  const highRiskCount =
-    apiScreening?.high_risk_count ?? activeRisks.filter(r => r.severity === 'high').length;
-  const mediumRiskCount =
-    apiScreening?.medium_risk_count ?? activeRisks.filter(r => r.severity === 'medium').length;
-  const lowRiskCount =
-    apiScreening?.low_risk_count ?? activeRisks.filter(r => r.severity === 'low').length;
-
-  // Dynamically compute the Safety Score / Risk Index
-  // Deduct 25 for each High Risk, 12 for Medium Risk, 5 for Low Risk
-  const maxScore = 100;
-  const penalty = (highRiskCount * 25) + (mediumRiskCount * 12) + (lowRiskCount * 5);
-  const safetyScore =
-    apiScreening?.safety_score ?? Math.max(0, maxScore - penalty);
-
-  // SVG Radial Gauge Metrics
-  const radius = 42;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (safetyScore / 100) * circumference;
-
-  // Score visual text labels
-  const getScoreInfo = (score: number) => {
-    if (score >= 90) return { label: '최상 (Excellent)', color: 'text-emerald-600', stroke: '#10b981' };
-    if (score >= 70) return { label: '양호 (Good)', color: 'text-sky-600', stroke: '#3b82f6' };
-    if (score >= 50) return { label: '주의 (Caution)', color: 'text-amber-600', stroke: '#f59e0b' };
-    return { label: '위험 (Warning)', color: 'text-rose-600', stroke: '#ef4444' };
-  };
-
-  const scoreInfo = getScoreInfo(safetyScore);
-
-  const selectedRisk = contract.risks.find(r => r.id === selectedRiskId);
-  const selectedBlock = blocks.find(b => b.riskId === selectedRiskId);
-
-  // Search filter
-  const filteredRisksList = contract.risks.filter(r => {
-    const query = searchTerm.toLowerCase();
-    return r.clauseName.toLowerCase().includes(query) || 
-           r.summary.toLowerCase().includes(query) || 
-           r.category.toLowerCase().includes(query);
-  });
-
-  // Helper to render word-level inline diff elements
-  const renderWordDiff = (original: string, modified: string) => {
-    if (!original || !modified) return null;
-    
-    // Strip clause numbers (like '4. ' or '3. ') from original comparison to match recommendation scope
-    const origClean = original.replace(/^(\d+\.\s+)/, '');
-    const diffs = computeWordDiff(origClean, modified);
-    
-    return (
-      <div className="p-4 bg-slate-50/70 border border-slate-200/80 rounded-xl text-[13px] font-sans text-slate-800 leading-relaxed max-h-72 overflow-y-auto tracking-normal whitespace-pre-wrap select-text shadow-inner">
-        {diffs.map((part, index) => {
-          if (part.type === 'added') {
-            return (
-              <span key={index} className="diff-word-add mx-0.5">
-                {part.text}
-              </span>
-            );
-          } else if (part.type === 'removed') {
-            return (
-              <span key={index} className="diff-word-del mx-0.5">
-                {part.text}
-              </span>
-            );
-          }
-          return <span key={index} className="opacity-90">{part.text}</span>;
-        })}
-      </div>
-    );
-  };
-
   if (!isAnalyzed) {
     return (
       <div className="w-full max-w-4xl mx-auto space-y-12 py-8 animate-fade-in-up">
@@ -347,6 +230,32 @@ export const Dashboard: React.FC = () => {
                   PDF, DOCX 등의 계약서 파일을 드래그 앤 드롭하거나 아래 영역을 클릭하여 업로드하면 AI 법률 분석 검토 프로세스가 시작됩니다.
                 </CardDescription>
               </CardHeader>
+
+              {uploadError && !isUploading && (
+                <div
+                  role="alert"
+                  className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-left flex gap-3 items-start"
+                >
+                  <ShieldAlert className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                  <div className="space-y-2 flex-1">
+                    <p className="text-sm font-bold text-rose-900">계약서 분석에 실패했습니다</p>
+                    <p className="text-xs text-rose-800 leading-relaxed">{uploadError}</p>
+                    <p className="text-[11px] text-rose-700">
+                      백엔드 서버가 실행 중인지 확인한 뒤, PDF·DOCX·TXT 파일로 다시 시도해 주세요.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setUploadError(null);
+                      }}
+                      className="text-xs font-bold text-rose-900 underline hover:text-rose-700"
+                    >
+                      닫기
+                    </button>
+                  </div>
+                </div>
+              )}
               
               {/* Interactive Upload Dropzone or Sequential Process Loading State */}
               <div 
@@ -492,6 +401,99 @@ export const Dashboard: React.FC = () => {
     );
   }
 
+  if (!apiContract || !apiScreening) {
+    return (
+      <div className="w-full max-w-lg mx-auto py-16 text-center space-y-4 animate-fade-in-up">
+        <ShieldAlert className="w-12 h-12 text-amber-600 mx-auto" />
+        <h2 className="text-xl font-bold text-slate-900">분석 결과를 불러오지 못했습니다</h2>
+        <p className="text-sm text-slate-600">
+          서버 응답이 비어 있거나 세션이 만료되었을 수 있습니다. 계약서를 다시 업로드해 주세요.
+        </p>
+        <button
+          type="button"
+          onClick={handleReset}
+          className="px-5 py-2.5 bg-navy-800 text-white rounded-xl text-sm font-bold hover:bg-navy-900 transition-colors"
+        >
+          업로드 화면으로 돌아가기
+        </button>
+      </div>
+    );
+  }
+
+  const contract = apiContract;
+
+  const activeRisks = contract.risks.filter(r => {
+    const block = blocks.find(b => b.riskId === r.id);
+    return block && !block.isResolved;
+  });
+
+  const resolvedCount = blocks.filter(b => b.isRisk && b.isResolved).length;
+
+  const highRiskCount =
+    apiScreening.high_risk_count ?? activeRisks.filter(r => r.severity === 'high').length;
+  const mediumRiskCount =
+    apiScreening.medium_risk_count ?? activeRisks.filter(r => r.severity === 'medium').length;
+  const lowRiskCount =
+    apiScreening.low_risk_count ?? activeRisks.filter(r => r.severity === 'low').length;
+
+  const maxScore = 100;
+  const penalty = highRiskCount * 25 + mediumRiskCount * 12 + lowRiskCount * 5;
+  const safetyScore = apiScreening.safety_score ?? Math.max(0, maxScore - penalty);
+
+  const radius = 42;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (safetyScore / 100) * circumference;
+
+  const getScoreInfo = (score: number) => {
+    if (score >= 90) return { label: '최상 (Excellent)', color: 'text-emerald-600', stroke: '#10b981' };
+    if (score >= 70) return { label: '양호 (Good)', color: 'text-sky-600', stroke: '#3b82f6' };
+    if (score >= 50) return { label: '주의 (Caution)', color: 'text-amber-600', stroke: '#f59e0b' };
+    return { label: '위험 (Warning)', color: 'text-rose-600', stroke: '#ef4444' };
+  };
+
+  const scoreInfo = getScoreInfo(safetyScore);
+
+  const selectedRisk = contract.risks.find(r => r.id === selectedRiskId);
+  const selectedBlock = blocks.find(b => b.riskId === selectedRiskId);
+
+  const filteredRisksList = contract.risks.filter(r => {
+    const query = searchTerm.toLowerCase();
+    return (
+      r.clauseName.toLowerCase().includes(query) ||
+      r.summary.toLowerCase().includes(query) ||
+      r.category.toLowerCase().includes(query)
+    );
+  });
+
+  const renderWordDiff = (original: string, modified: string) => {
+    if (!original || !modified) return null;
+
+    const origClean = original.replace(/^(\d+\.\s+)/, '');
+    const diffs = computeWordDiff(origClean, modified);
+
+    return (
+      <div className="p-4 bg-slate-50/70 border border-slate-200/80 rounded-xl text-[13px] font-sans text-slate-800 leading-relaxed max-h-72 overflow-y-auto tracking-normal whitespace-pre-wrap select-text shadow-inner">
+        {diffs.map((part, index) => {
+          if (part.type === 'added') {
+            return (
+              <span key={index} className="diff-word-add mx-0.5">
+                {part.text}
+              </span>
+            );
+          }
+          if (part.type === 'removed') {
+            return (
+              <span key={index} className="diff-word-del mx-0.5">
+                {part.text}
+              </span>
+            );
+          }
+          return <span key={index} className="opacity-90">{part.text}</span>;
+        })}
+      </div>
+    );
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto space-y-8 animate-fade-in-up">
       
@@ -623,9 +625,7 @@ export const Dashboard: React.FC = () => {
               <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold">
                 <span className="text-slate-600">
                   AI 권고안 반영률: <span className="text-navy-800 font-bold">{resolvedCount} / {contract.risks.length} 건</span>
-                  {isLiveData && (
-                    <span className="ml-2 text-[10px] text-emerald-700 font-bold">· API 연동</span>
-                  )}
+                  <span className="ml-2 text-[10px] text-emerald-700 font-bold">· API 연동</span>
                 </span>
                 {safetyScore < 100 && (
                   <button 
@@ -867,7 +867,8 @@ export const Dashboard: React.FC = () => {
                   <FileText className="w-4 h-4" />
                 </div>
                 <span className="text-xs font-bold text-slate-700 uppercase font-mono select-none">
-                  {isLiveData ? `${contract.title} (${jobId || ''})` : '상호비밀유지계약서_검토본.txt'}
+                  {contract.title}
+                  {jobId ? ` · ${jobId.slice(0, 8)}` : ''}
                 </span>
               </div>
               <div className="text-[11px] text-slate-600 font-semibold flex items-center gap-3">
