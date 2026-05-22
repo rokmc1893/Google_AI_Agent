@@ -1,1 +1,1 @@
-"""Phase 3 — Embedding RAG + Chroma."""
+"""Phase 3 - Embedding RAG + Chroma."""

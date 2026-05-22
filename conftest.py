@@ -154,10 +154,10 @@ def mock_embeddings():
 
     with patch("langchain_openai.OpenAIEmbeddings") as mock_cls:
         instance = MagicMock()
-        # 항상 동일한 차원의 벡터 반환 (1536-dim, OpenAI ada-002 기준)
-        instance.embed_query.return_value = np.random.rand(1536).tolist()
+        # 항상 동일한 차원의 벡터 반환 (384-dim, OpenAI text-embedding-3-small 기준)
+        instance.embed_query.return_value = np.random.rand(384).tolist()
         instance.embed_documents.side_effect = lambda texts: [
-            np.random.rand(1536).tolist() for _ in texts
+            np.random.rand(384).tolist() for _ in texts
         ]
         mock_cls.return_value = instance
         yield instance

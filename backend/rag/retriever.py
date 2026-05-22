@@ -23,7 +23,7 @@ def build_law_context(
     filename: str = "contract",
 ) -> dict[str, Any]:
     """
-    Phase 3 — 법령·계약 맥락 수집 (semantic + Law API).
+    Phase 3 - 법령·계약 맥락 수집 (semantic + Law API).
     실패해도 빈 구조 반환.
     """
     issues = issues or []
@@ -110,7 +110,7 @@ def build_law_context(
 
     result["law_context"] = "\n".join(parts)
     if not result["law_context"] and not settings.law_api_key.strip():
-        result["law_context"] = "(법령 RAG 비활성 — 규칙/키워드 fallback 사용)"
+        result["law_context"] = "(법령 RAG 비활성 - 규칙/키워드 fallback 사용)"
 
     logger.info(
         "[RAG] context_len=%s laws=%s chunks=%s rag_used=%s",

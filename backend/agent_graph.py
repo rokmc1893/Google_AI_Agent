@@ -54,7 +54,7 @@ class LegalScreeningPipeline:
             from backend.graph.workflow import compile_screening_graph
 
             self._compiled_graph = compile_screening_graph(self)
-            print("[LangGraph] StateGraph 컴파일 완료 — invoke 모드")
+            print("[LangGraph] StateGraph 컴파일 완료 - invoke 모드")
 
     def parse_contract_node(self, state: AgentState) -> AgentState:
         print("[Node: Parser] 계약서 파싱 및 구조화 시작...")
