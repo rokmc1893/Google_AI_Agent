@@ -102,37 +102,6 @@
   box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.15);
 }
 
-.shine-overlay {
-  position: relative;
-}
-
-.shine-overlay::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.3) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  transform: skewX(-25deg);
-  pointer-events: none;
-}
-
-.shine-overlay.animate-shine::after {
-  animation: shine-animation 0.75s ease-out forwards;
-}
-
-@keyframes shine-animation {
-  to {
-    left: 150%;
-  }
-}
-
 .metadata-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

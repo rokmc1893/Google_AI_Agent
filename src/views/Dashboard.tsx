@@ -507,7 +507,7 @@ export const Dashboard: React.FC = () => {
             <Activity className="w-3.5 h-3.5" />
             AI 법률 스크리닝 플랫폼
           </div>
-          <h1 className="text-4xl font-extrabold text-slate-900 leading-tight tracking-tight">
+          <h1 className="text-4xl font-semibold text-slate-900 leading-tight tracking-tight">
             계약서 검토를 더 쉽고, 빠르게
           </h1>
           <p className="text-sm text-slate-600 max-w-xl mx-auto leading-relaxed">
@@ -517,7 +517,7 @@ export const Dashboard: React.FC = () => {
 
         {/* 대형 업로드 영역 */}
         <div className="max-w-2xl mx-auto">
-          <Card variant="dashboard" className="flex flex-col justify-between border-dashed border-2 hover:border-navy-800/40 p-8 min-h-[380px] radial-glow-navy transition-all duration-300 group shadow-md bg-white">
+          <Card variant="dashboard" className="flex flex-col justify-between border-dashed border-2 hover:border-navy-800/40 p-8 min-h-[380px] radial-glow-navy transition-all duration-300 group shadow-sm bg-white">
             <div className="space-y-6">
               <CardHeader className="p-0 text-center">
                 <div className="mx-auto w-12 h-12 rounded-xl bg-navy-800/5 text-navy-800 flex items-center justify-center mb-3 group-hover:scale-105 group-hover:bg-navy-800/10 transition-all duration-300">
@@ -583,7 +583,7 @@ export const Dashboard: React.FC = () => {
                         }`}>
                           {uploadStep > 1 ? <Check className="w-3 h-3" /> : '1'}
                         </span>
-                        <span className={`text-[11.5px] font-semibold transition-colors duration-300 ${uploadStep === 1 ? 'text-navy-800' : uploadStep > 1 ? 'text-slate-400' : 'text-slate-300'}`}>
+                        <span className={`text-xs font-medium leading-5 transition-colors duration-300 ${uploadStep === 1 ? 'text-navy-800' : uploadStep > 1 ? 'text-slate-400' : 'text-slate-300'}`}>
                           계약서 구조 파악 및 민감 정보 마스킹
                         </span>
                       </div>
@@ -594,7 +594,7 @@ export const Dashboard: React.FC = () => {
                         }`}>
                           {uploadStep > 2 ? <Check className="w-3 h-3" /> : '2'}
                         </span>
-                        <span className={`text-[11.5px] font-semibold transition-colors duration-300 ${uploadStep === 2 ? 'text-navy-800' : uploadStep > 2 ? 'text-slate-400' : 'text-slate-300'}`}>
+                        <span className={`text-xs font-medium leading-5 transition-colors duration-300 ${uploadStep === 2 ? 'text-navy-800' : uploadStep > 2 ? 'text-slate-400' : 'text-slate-300'}`}>
                           법률 위반 및 표준 조항 대비 검색
                         </span>
                       </div>
@@ -605,7 +605,7 @@ export const Dashboard: React.FC = () => {
                         }`}>
                           {uploadStep > 3 ? <Check className="w-3 h-3" /> : '3'}
                         </span>
-                        <span className={`text-[11.5px] font-semibold transition-colors duration-300 ${uploadStep === 3 ? 'text-navy-800' : uploadStep > 3 ? 'text-slate-400' : 'text-slate-300'}`}>
+                        <span className={`text-xs font-medium leading-5 transition-colors duration-300 ${uploadStep === 3 ? 'text-navy-800' : uploadStep > 3 ? 'text-slate-400' : 'text-slate-300'}`}>
                           책임 한도액 및 면책 위험도 분류
                         </span>
                       </div>
@@ -616,7 +616,7 @@ export const Dashboard: React.FC = () => {
                         }`}>
                           {uploadStep > 4 ? <Check className="w-3 h-3" /> : '4'}
                         </span>
-                        <span className={`text-[11.5px] font-semibold transition-colors duration-300 ${uploadStep === 4 ? 'text-navy-800' : 'text-slate-300'}`}>
+                        <span className={`text-xs font-medium leading-5 transition-colors duration-300 ${uploadStep === 4 ? 'text-navy-800' : 'text-slate-300'}`}>
                           AI 수정 권고안 생성 및 검토
                         </span>
                       </div>
@@ -733,7 +733,7 @@ export const Dashboard: React.FC = () => {
     if (!diffs) return null;
 
     return (
-      <div className="p-4 bg-slate-50/70 border border-slate-200/80 rounded-xl text-[13px] font-sans text-slate-800 leading-relaxed max-h-72 overflow-y-auto tracking-normal whitespace-pre-wrap select-text shadow-inner">
+      <div className="p-4 bg-slate-50/70 border border-slate-200/80 rounded-xl text-sm font-sans text-slate-800 leading-7 max-h-72 overflow-y-auto tracking-normal whitespace-pre-wrap select-text">
         {diffs.map((part, index) => {
           if (part.type === 'added') {
             return (
@@ -765,7 +765,7 @@ export const Dashboard: React.FC = () => {
             <Activity className="w-3.5 h-3.5" />
             AI 법률 스크리닝 플랫폼
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-900 leading-tight tracking-tight">
+          <h1 className="text-3xl font-semibold text-slate-900 leading-tight tracking-tight">
             {koreanHeadings.dashboardTitle}
           </h1>
           <p className="text-sm text-slate-600 mt-1">
@@ -797,7 +797,6 @@ export const Dashboard: React.FC = () => {
               실시간 문서 검토
               {activeRisks.length > 0 && (
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
                 </span>
               )}
@@ -864,14 +863,14 @@ export const Dashboard: React.FC = () => {
                   </svg>
                   {/* Inside circle number */}
                   <div className="absolute flex flex-col items-center justify-center">
-                    <span className="text-2xl font-extrabold text-slate-900 leading-none">{safetyScore}</span>
+                    <span className="text-2xl font-semibold text-slate-900 leading-none">{safetyScore}</span>
                     <span className="text-[10px] text-slate-500 font-bold mt-0.5 uppercase tracking-wide">안전 점수</span>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
                   <div className="text-xs text-slate-600 font-medium">안전성 평가 등급</div>
-                  <div className={`text-lg font-extrabold ${scoreInfo.color} flex items-center gap-1.5`}>
+                  <div className={`text-lg font-semibold ${scoreInfo.color} flex items-center gap-1.5`}>
                     {scoreInfo.label}
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed font-medium">
@@ -909,7 +908,7 @@ export const Dashboard: React.FC = () => {
             <div className="lg:col-span-7 grid sm:grid-cols-3 gap-6 items-stretch">
               
               {/* High Risks Card */}
-              <Card variant="dashboard" className="border-l-4 border-rose-500 flex flex-col justify-between p-6 hover:-translate-y-1 shadow-sm transition-all duration-300">
+              <Card variant="dashboard" className="border-l-4 border-rose-500 flex flex-col justify-between p-6 shadow-sm transition-all duration-300">
                 <CardHeader className="p-0">
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-rose-800 uppercase tracking-wide">
@@ -919,7 +918,7 @@ export const Dashboard: React.FC = () => {
                       <ShieldAlert className="w-4 h-4" />
                     </div>
                   </div>
-                  <div className="text-4xl font-extrabold text-rose-600 mt-3 tracking-tight">
+                  <div className="text-4xl font-semibold text-rose-600 mt-3 tracking-tight">
                     {highRiskCount} <span className="text-xs text-slate-500 font-semibold">건</span>
                   </div>
                 </CardHeader>
@@ -929,7 +928,7 @@ export const Dashboard: React.FC = () => {
               </Card>
 
               {/* Medium Risks Card */}
-              <Card variant="dashboard" className="border-l-4 border-amber-500 flex flex-col justify-between p-6 hover:-translate-y-1 shadow-sm transition-all duration-300">
+              <Card variant="dashboard" className="border-l-4 border-amber-500 flex flex-col justify-between p-6 shadow-sm transition-all duration-300">
                 <CardHeader className="p-0">
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-amber-800 uppercase tracking-wide">
@@ -939,7 +938,7 @@ export const Dashboard: React.FC = () => {
                       <AlertTriangle className="w-4 h-4" />
                     </div>
                   </div>
-                  <div className="text-4xl font-extrabold text-amber-600 mt-3 tracking-tight">
+                  <div className="text-4xl font-semibold text-amber-600 mt-3 tracking-tight">
                     {mediumRiskCount} <span className="text-xs text-slate-500 font-semibold">건</span>
                   </div>
                 </CardHeader>
@@ -949,7 +948,7 @@ export const Dashboard: React.FC = () => {
               </Card>
 
               {/* Low Risks Card */}
-              <Card variant="dashboard" className="border-l-4 border-emerald-500 flex flex-col justify-between p-6 hover:-translate-y-1 shadow-sm transition-all duration-300">
+              <Card variant="dashboard" className="border-l-4 border-emerald-500 flex flex-col justify-between p-6 shadow-sm transition-all duration-300">
                 <CardHeader className="p-0">
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-emerald-800 uppercase tracking-wide">
@@ -959,7 +958,7 @@ export const Dashboard: React.FC = () => {
                       <CheckCircle2 className="w-4 h-4" />
                     </div>
                   </div>
-                  <div className="text-4xl font-extrabold text-emerald-600 mt-3 tracking-tight">
+                  <div className="text-4xl font-semibold text-emerald-600 mt-3 tracking-tight">
                     {lowRiskCount} <span className="text-xs text-slate-500 font-semibold">건</span>
                   </div>
                 </CardHeader>
@@ -997,7 +996,7 @@ export const Dashboard: React.FC = () => {
           <div className="space-y-4 pt-2">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="text-slate-900 font-bold text-lg flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-navy-800 animate-pulse-subtle" />
+                <Sparkles className="w-5 h-5 text-navy-800" />
                 실시간 스크리닝 리스크 검출 조항
               </div>
               
@@ -1149,7 +1148,7 @@ export const Dashboard: React.FC = () => {
             </div>
 
             {/* Document Body with absolute 32px (p-8) padding constraint & legalpad margins */}
-            <div className="flex-1 overflow-y-auto p-8 legal-text font-sans text-slate-900 whitespace-pre-line leading-relaxed space-y-6 select-none bg-white relative">
+            <div className="flex-1 overflow-y-auto p-8 legal-text font-sans text-slate-800 whitespace-pre-line leading-7 space-y-6 select-none bg-white relative">
               {blocks.map((block) => {
                 if (!block.isRisk) {
                   return (
@@ -1193,7 +1192,7 @@ export const Dashboard: React.FC = () => {
                     key={block.id}
                     onClick={() => risk && setSelectedRiskId(risk.id)}
                     className={`ml-10 p-4 rounded-xl cursor-pointer transition-all duration-300 relative select-none ${highlightClass} ${
-                      isShining ? 'shine-overlay animate-shine bg-emerald-100 border-emerald-600 text-emerald-950' : ''
+                      isShining ? 'bg-emerald-100 border-emerald-600 text-emerald-950' : ''
                     }`}
                   >
                     {/* Visual left edge dynamic active highlighter */}
@@ -1202,7 +1201,7 @@ export const Dashboard: React.FC = () => {
                     )}
                     
                     {/* Corner Tag Label */}
-                    <span className={`absolute right-3.5 top-3.5 text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full select-none shadow-sm ${
+                    <span className={`absolute right-3.5 top-3.5 text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full select-none ${
                       block.isResolved ? 'bg-emerald-500 text-white' :
                       risk?.severity === 'high' ? 'bg-rose-600 text-white' :
                       risk?.severity === 'medium' ? 'bg-amber-500 text-white' : 'bg-slate-500 text-white'
@@ -1211,7 +1210,7 @@ export const Dashboard: React.FC = () => {
                     </span>
 
                     {/* Block Text content */}
-                    <div className="pr-12 text-[14.5px] leading-relaxed">
+                    <div className="pr-12 text-sm leading-7">
                       {block.text}
                     </div>
                   </div>
@@ -1222,7 +1221,7 @@ export const Dashboard: React.FC = () => {
 
           {/* RIGHT PANE: AI Redlining Feed Panel */}
           <div className="lg:col-span-5 space-y-6">
-            <Card variant="dashboard" className="border-l-4 border-l-navy-800 shadow-md radial-glow-navy p-6 flex flex-col justify-between">
+            <Card variant="dashboard" className="border-l-4 border-l-navy-800 shadow-sm p-6 flex flex-col justify-between">
               
               <div className="space-y-5">
                 <CardHeader className="pb-3 border-b border-slate-100 p-0 mb-0">
@@ -1259,7 +1258,7 @@ export const Dashboard: React.FC = () => {
 
                 {/* Risk Explanation */}
                 <div className="space-y-1.5 p-3.5 bg-slate-50 border border-slate-200/60 rounded-xl">
-                  <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wide">리스크 분석 요약</span>
+                  <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">리스크 분석 요약</span>
                   <p className="text-xs font-bold text-slate-800 leading-relaxed">
                     {selectedRisk?.summary}
                   </p>
@@ -1298,11 +1297,11 @@ export const Dashboard: React.FC = () => {
                     <div className="space-y-3.5 animate-slide-in">
                       {/* Original text block */}
                       <div className="space-y-1">
-                        <span className="text-[10px] font-extrabold text-rose-700 uppercase tracking-wide flex items-center gap-1">
+                        <span className="text-[10px] font-semibold text-rose-700 uppercase tracking-wide flex items-center gap-1">
                           <AlertTriangle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
                           {koreanHeadings.originalClause}
                         </span>
-                        <div className="p-3 bg-rose-50/30 border border-rose-200/60 rounded-xl text-[11.5px] font-sans text-slate-700 leading-relaxed max-h-32 overflow-y-auto">
+                        <div className="p-3 bg-rose-50/30 border border-rose-200/60 rounded-xl text-xs font-sans text-slate-700 leading-6 max-h-32 overflow-y-auto">
                           {selectedBlock?.originalText}
                         </div>
                       </div>
@@ -1310,11 +1309,11 @@ export const Dashboard: React.FC = () => {
                       {/* Recommendation block */}
                       {selectedRisk && (
                         <div className="space-y-1">
-                          <span className="text-[10px] font-extrabold text-navy-800 uppercase tracking-wide flex items-center gap-1">
+                          <span className="text-[10px] font-semibold text-navy-800 uppercase tracking-wide flex items-center gap-1">
                             <Sparkles className="w-3.5 h-3.5 text-navy-800 shrink-0" />
                             {koreanHeadings.suggestedClause}
                           </span>
-                          <div className="p-3 bg-navy-50/30 border border-navy-200/60 rounded-xl text-[11.5px] font-sans text-navy-950 leading-relaxed max-h-32 overflow-y-auto font-medium">
+                          <div className="p-3 bg-navy-50/30 border border-navy-200/60 rounded-xl text-xs font-sans text-navy-950 leading-6 max-h-32 overflow-y-auto font-medium">
                             {selectedRisk.recommendation}
                           </div>
                         </div>
@@ -1322,7 +1321,7 @@ export const Dashboard: React.FC = () => {
                     </div>
                   ) : (
                     <div className="space-y-1.5 animate-slide-in">
-                      <span className="text-[10px] font-extrabold text-navy-800 uppercase tracking-wide flex items-center gap-1 select-none">
+                      <span className="text-[10px] font-semibold text-navy-800 uppercase tracking-wide flex items-center gap-1 select-none">
                         <Sparkles className="w-3.5 h-3.5 text-navy-800 shrink-0" />
                         AI 자동 수정 권고 레드라인 (단어 비교)
                       </span>
@@ -1345,7 +1344,7 @@ export const Dashboard: React.FC = () => {
                     selectedRisk && (
                       <button
                         onClick={() => handleApplyRecommendation(selectedRisk.id, selectedRisk.recommendation)}
-                        className="w-full bg-navy-800 hover:bg-navy-900 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-sm transition-all duration-300 hover:shadow flex items-center justify-center gap-1.5 animate-pulse-subtle cursor-pointer active:scale-98"
+                        className="w-full bg-navy-800 hover:bg-navy-900 text-white text-xs font-semibold py-2.5 px-4 rounded-xl shadow-sm transition-all duration-300 hover:shadow flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"
                       >
                         <FileCheck className="w-3.5 h-3.5" />
                         AI 수정 권고안 본문 반영
@@ -1373,7 +1372,7 @@ export const Dashboard: React.FC = () => {
                     <Accordion>
                       <AccordionItem id="detail-analysis" trigger={koreanHeadings.analysisDetail}>
                         <div className="space-y-3.5 pt-1">
-                          <p className="text-[12.5px] leading-relaxed text-slate-600 font-medium select-text">{selectedRisk.analysisDetail}</p>
+                          <p className="text-sm leading-6 text-slate-600 font-medium select-text">{selectedRisk.analysisDetail}</p>
                           <div className="flex justify-between items-center bg-slate-50 border border-slate-200/50 p-3 rounded-xl text-xs">
                             <span className="font-bold text-slate-500">조치 난이도 및 비용:</span>
                             <Badge variant={

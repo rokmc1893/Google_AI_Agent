@@ -20,16 +20,16 @@ export const Card: React.FC<CardProps> = ({
   let variantClass = '';
   switch (variant) {
     case 'dashboard':
-      variantClass = 'bg-white border border-slate-200/95 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-slate-300/80 transition-all duration-300 radial-glow-navy';
+      variantClass = 'bg-white border border-slate-200/95 rounded-2xl shadow-sm hover:shadow-sm hover:border-slate-300/80 transition-colors duration-300';
       break;
     case 'document':
       variantClass = 'paper-document rounded-2xl';
       break;
     case 'glass':
-      variantClass = 'glass-card rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border-white/60';
+      variantClass = 'glass-card rounded-2xl shadow-sm transition-colors duration-300 border-white/60';
       break;
     case 'glowing':
-      variantClass = 'bg-white border border-slate-200/95 rounded-2xl shadow-sm animate-border-glow transition-all duration-300 radial-glow-navy';
+      variantClass = 'bg-white border border-slate-200/95 rounded-2xl shadow-sm transition-colors duration-300';
       break;
     default:
       variantClass = 'bg-white border border-slate-200 rounded-2xl';
@@ -52,7 +52,7 @@ export const CardHeader: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ chi
 );
 
 export const CardTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({ children, className = '', ...props }) => (
-  <h3 className={`text-lg font-bold leading-none tracking-tight text-slate-900 ${className}`} {...props}>
+  <h3 className={`text-lg font-semibold leading-tight tracking-tight text-slate-900 ${className}`} {...props}>
     {children}
   </h3>
 );

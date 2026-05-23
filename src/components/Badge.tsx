@@ -13,10 +13,10 @@ export const Badge: React.FC<BadgeProps> = ({
   variant = 'primary',
   ...props 
 }) => {
-  const baseClasses = 'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border transition-all duration-200 focus:outline-none';
+  const baseClasses = 'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium border transition-colors duration-200 focus:outline-none';
   
   const variantClasses: Record<BadgeVariant, string> = {
-    primary: 'bg-navy-800 border-navy-800/80 text-white shadow-sm hover:bg-navy-900 hover:shadow-md active:scale-95',
+    primary: 'bg-navy-800 border-navy-800/80 text-white hover:bg-navy-900',
     secondary: 'bg-slate-100/90 border-slate-200 text-slate-700 hover:bg-slate-200/60 hover:text-slate-900',
     high: 'bg-rose-50/80 border-rose-200/60 text-rose-800 hover:bg-rose-100/60 shadow-sm shadow-rose-100/30',
     medium: 'bg-amber-50/80 border-amber-200/60 text-amber-900 hover:bg-amber-100/60 shadow-sm shadow-amber-100/30',
@@ -28,7 +28,7 @@ export const Badge: React.FC<BadgeProps> = ({
   // Add dot indicator for high/medium/low severity badges
   const renderDot = () => {
     if (variant === 'high') {
-      return <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shrink-0"></span>;
+      return <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0"></span>;
     }
     if (variant === 'medium') {
       return <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>;

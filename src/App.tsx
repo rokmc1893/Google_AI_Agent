@@ -20,10 +20,10 @@ function App() {
               <Scale className="w-4.5 h-4.5" />
             </div>
             <div>
-              <span className="font-extrabold text-slate-900 tracking-tight text-base group-hover:text-navy-800 transition-colors">
+              <span className="font-semibold text-slate-900 tracking-tight text-base group-hover:text-navy-800 transition-colors">
                 Deepgle <span className="font-medium text-slate-600">Legal</span>
               </span>
-              <span className="block text-[8.5px] uppercase tracking-wider text-slate-500 font-bold -mt-0.5">
+              <span className="block text-xs tracking-wide text-slate-500 font-medium -mt-0.5">
                 AI 법률 스크리닝 어시스턴트
               </span>
             </div>
