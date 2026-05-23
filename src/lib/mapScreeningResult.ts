@@ -17,20 +17,32 @@ function inferCategory(title: string): LegalRisk['category'] {
   return 'Term & Termination';
 }
 
-function mapIssue(issue: ScreeningResult['verified_issues'][number]): LegalRisk {
+function mapIssue(issue: ScreeningResult['verified_issues'][number], index: number): LegalRisk {
   const level = (issue.risk_level || 'MEDIUM').toLowerCase() as LegalRisk['severity'];
   const basis = issue.legal_basis_text || issue.legal_basis || '';
-  return {
-    id: issue.id,
-    clauseName: issue.title,
-    severity: level === 'high' || level === 'medium' || level === 'low' ? level : 'medium',
-    category: inferCategory(issue.title),
-    summary: issue.description || issue.title,
-    originalText: issue.clause_text || issue.description,
-    recommendation: basis
+  const replacement = issue.replacement_clause?.trim();
+  const recommendation =
+    issue.recommendation?.trim() ||
+    (replacement ? '아래 대체 조항을 기준으로 수정을 검토하세요.' : '') ||
+    (basis
       ? `관련 법령(${issue.legal_basis || '검토'})에 맞게 조항을 조정하세요.`
-      : '법무팀 검토 후 수정안을 확정하세요.',
-    analysisDetail: [issue.description, issue.legal_basis, issue.legal_basis_text, ...(issue.citations || [])]
+      : '법무팀 검토 후 수정안을 확정하세요.');
+
+  return {
+    id: issue.id || issue.title || `issue-${index + 1}`,
+    clauseName: issue.title || '계약 리스크',
+    severity: level === 'high' || level === 'medium' || level === 'low' ? level : 'medium',
+    category: inferCategory(`${issue.title} ${issue.description} ${basis}`),
+    summary: issue.description || issue.title || '계약 조항 검토가 필요합니다.',
+    originalText: issue.clause_text || issue.clause_anchor?.heading || issue.description || issue.title,
+    recommendation: replacement || recommendation,
+    analysisDetail: [
+      issue.description,
+      issue.legal_basis,
+      issue.legal_basis_text,
+      issue.clause_anchor?.heading ? `조항 위치: ${issue.clause_anchor.heading}` : '',
+      ...(issue.citations || []),
+    ]
       .filter(Boolean)
       .join('\n'),
     remedyCost: issue.risk_level === 'HIGH' ? 'High' : issue.risk_level === 'MEDIUM' ? 'Medium' : 'Low',
@@ -42,11 +54,18 @@ export function mapResultToContractData(
   upload?: UploadMeta,
 ): ContractData {
   const risks = (result.verified_issues.length ? result.verified_issues : result.issues).map(mapIssue);
+  const fullText =
+    result.full_text?.trim() ||
+    result.contract_masked?.trim() ||
+    result.masked_text?.trim() ||
+    upload?.text_preview ||
+    result.output_report.slice(0, 3000);
   return {
     title: upload?.filename || '스크리닝 계약서',
     type: upload?.file_type?.toUpperCase() || 'Contract',
     lastUpdated: new Date().toISOString().slice(0, 10),
-    fullText: upload?.text_preview || result.output_report.slice(0, 3000),
+    fullText,
+    maskedText: result.masked_text || result.contract_masked || null,
     risks,
   };
 }

@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     api_port: int = 8000
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
     max_upload_bytes: int = 10 * 1024 * 1024
+    demo_api_token: str = ""
+    job_ttl_minutes: int = 30
+    uploads_per_minute: int = 10
+    max_concurrent_screenings: int = 2
 
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.0-flash"

@@ -47,7 +47,6 @@ class GeminiClient:
             try:
                 from openai import OpenAI
                 logger.info("Trying OpenAI API...")
-                print("[LLMClient] OpenAI 호출 시도 중...")
                 client = OpenAI(api_key=self.settings.openai_api_key.strip())
                 response = client.chat.completions.create(
                     model=self.settings.openai_model,
@@ -59,18 +58,15 @@ class GeminiClient:
                 )
                 res_text = response.choices[0].message.content
                 if res_text:
-                    print("[LLMClient] OpenAI 호출 성공!")
                     return res_text.strip()
-            except Exception as e:
-                logger.warning("OpenAI API failed, transitioning to Ollama: %s", e)
-                print(f"[LLMClient] OpenAI 호출 실패 ({e}) -> Ollama로 자동 전환합니다.")
+            except Exception:
+                logger.warning("OpenAI API failed, transitioning to Ollama", exc_info=True)
 
         # 2. Ollama 호출 시도
         if self.settings.ollama_base_url.strip():
             try:
                 from openai import OpenAI
                 logger.info("Trying Ollama API at %s...", self.settings.ollama_base_url)
-                print(f"[LLMClient] Ollama 호출 시도 중 ({self.settings.ollama_model})...")
                 client = OpenAI(
                     base_url=f"{self.settings.ollama_base_url.rstrip('/')}/v1",
                     api_key="ollama"
@@ -85,17 +81,14 @@ class GeminiClient:
                 )
                 res_text = response.choices[0].message.content
                 if res_text:
-                    print("[LLMClient] Ollama 호출 성공!")
                     return res_text.strip()
-            except Exception as e:
-                logger.warning("Ollama API failed: %s", e)
-                print(f"[LLMClient] Ollama 호출 실패 ({e}).")
+            except Exception:
+                logger.warning("Ollama API failed", exc_info=True)
 
         # 3. Gemini 최종 백업 시도
         if self.settings.gemini_api_key.strip():
             try:
                 logger.info("Trying Gemini API...")
-                print("[LLMClient] Gemini 호출 시도 중...")
                 model = self._get_model()
                 prompt = f"{system.strip()}\n\n{user.strip()}"
                 response = model.generate_content(prompt)
@@ -104,11 +97,9 @@ class GeminiClient:
                     parts = response.candidates[0].content.parts
                     text = "".join(getattr(p, "text", "") or "" for p in parts)
                 if text:
-                    print("[LLMClient] Gemini 호출 성공!")
                     return text.strip()
-            except Exception as e:
-                logger.warning("Gemini API failed: %s", e)
-                print(f"[LLMClient] Gemini 호출 실패 ({e}).")
+            except Exception:
+                logger.warning("Gemini API failed", exc_info=True)
 
         raise LLMNotConfiguredError("모든 LLM 호출이 실패했거나 구성되지 않았습니다.")
 

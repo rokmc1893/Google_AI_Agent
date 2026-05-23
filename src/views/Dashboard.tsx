@@ -1,11 +1,13 @@
-import React, { useRef, useState } from 'react';
-import type { ScreeningResult } from '../api/client';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { isAbortRequestError, isTimeoutRequestError, type ScreeningResult } from '../api/client';
 import { MaskingCompare } from '../components/MaskingCompare';
-import { useScreeningMutation } from '../hooks/useScreening';
+import { clearScreeningQueries, useJobStatus, useScreeningResult, useStartScreening } from '../hooks/useScreening';
 import {
   buildBlocksFromContract,
   mapResultToContractData,
   type ContractBlock,
+  type UploadMeta,
 } from '../lib/mapScreeningResult';
 import { koreanHeadings } from '../constants/uiLabels';
 import type { ContractData } from '../types/contract';
@@ -31,11 +33,30 @@ import {
   ShieldAlert
 } from 'lucide-react';
 
+type WordDiffPart = { type: 'added' | 'removed' | 'common', text: string };
+
+const MAX_DIFF_WORDS = 800;
+const EMPTY_RISKS: ContractData['risks'] = [];
+
+function getScoreInfo(score: number) {
+  if (score >= 90) return { label: '최상 (Excellent)', color: 'text-emerald-600', stroke: '#10b981' };
+  if (score >= 70) return { label: '양호 (Good)', color: 'text-sky-600', stroke: '#3b82f6' };
+  if (score >= 50) return { label: '주의 (Caution)', color: 'text-amber-600', stroke: '#f59e0b' };
+  return { label: '위험 (Warning)', color: 'text-rose-600', stroke: '#ef4444' };
+}
+
 // Client-side lightweight word-level LCS (Longest Common Subsequence) diff utility
-function computeWordDiff(str1: string, str2: string) {
+function computeWordDiff(str1: string, str2: string): WordDiffPart[] {
   // Normalize whitespaces but keep structure
   const words1 = str1.split(/(\s+)/).filter(w => w.length > 0);
   const words2 = str2.split(/(\s+)/).filter(w => w.length > 0);
+
+  if (words1.length > MAX_DIFF_WORDS || words2.length > MAX_DIFF_WORDS) {
+    return [
+      { type: 'removed', text: str1 },
+      { type: 'added', text: str2 },
+    ];
+  }
   
   const dp: number[][] = Array(words1.length + 1).fill(0).map(() => Array(words2.length + 1).fill(0));
   
@@ -49,7 +70,7 @@ function computeWordDiff(str1: string, str2: string) {
     }
   }
   
-  const diff: { type: 'added' | 'removed' | 'common', text: string }[] = [];
+  const diff: WordDiffPart[] = [];
   let i = words1.length, j = words2.length;
   
   while (i > 0 || j > 0) {
@@ -69,7 +90,73 @@ function computeWordDiff(str1: string, str2: string) {
   return diff;
 }
 
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+const MAX_PDF_PAGES = 50;
+const ALLOWED_UPLOAD_EXTENSIONS = new Set(['txt', 'pdf', 'docx']);
+const ALLOWED_UPLOAD_MIME_TYPES: Record<string, Set<string>> = {
+  txt: new Set(['text/plain']),
+  pdf: new Set(['application/pdf']),
+  docx: new Set(['application/vnd.openxmlformats-officedocument.wordprocessingml.document']),
+};
+
+const JOB_NODE_LABELS: Record<string, string> = {
+  screening: '스크리닝 작업 준비 중',
+  langgraph: 'LangGraph 법률 분석 실행 중',
+  completed: '분석 완료',
+  failed: '분석 실패',
+};
+
+function getFileExtension(filename: string): string {
+  return filename.split('.').pop()?.toLowerCase() || '';
+}
+
+function formatBytes(bytes: number): string {
+  return `${Math.floor(bytes / (1024 * 1024))}MB`;
+}
+
+async function estimatePdfPageCount(file: File): Promise<number> {
+  const text = new TextDecoder('latin1').decode(await file.arrayBuffer());
+  return text.match(/\/Type\s*\/Page\b/g)?.length ?? 0;
+}
+
+async function validateUploadFile(file: File): Promise<void> {
+  const ext = getFileExtension(file.name);
+  if (!ALLOWED_UPLOAD_EXTENSIONS.has(ext)) {
+    throw new Error('지원하지 않는 파일 형식입니다. PDF, DOCX, TXT 파일만 업로드해 주세요.');
+  }
+  if (file.size === 0) {
+    throw new Error('빈 파일은 업로드할 수 없습니다.');
+  }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    throw new Error(`파일 크기는 ${formatBytes(MAX_UPLOAD_BYTES)} 이하여야 합니다.`);
+  }
+
+  const allowedMimeTypes = ALLOWED_UPLOAD_MIME_TYPES[ext];
+  if (file.type && file.type !== 'application/octet-stream' && !allowedMimeTypes.has(file.type)) {
+    throw new Error(`파일 MIME 타입이 올바르지 않습니다. 감지: ${file.type}`);
+  }
+
+  const header = new Uint8Array(await file.slice(0, 8).arrayBuffer());
+  if (ext === 'pdf') {
+    const signature = String.fromCharCode(...header.slice(0, 5));
+    if (signature !== '%PDF-') throw new Error('PDF 파일 서명이 올바르지 않습니다.');
+    const pageCount = await estimatePdfPageCount(file);
+    if (pageCount > MAX_PDF_PAGES) {
+      throw new Error(`PDF는 최대 ${MAX_PDF_PAGES}페이지까지 업로드할 수 있습니다.`);
+    }
+  }
+  if (ext === 'docx') {
+    if (!(header[0] === 0x50 && header[1] === 0x4b && header[2] === 0x03 && header[3] === 0x04)) {
+      throw new Error('DOCX 파일 서명이 올바르지 않습니다.');
+    }
+  }
+  if (ext === 'txt' && header.includes(0)) {
+    throw new Error('TXT 파일에 바이너리 데이터가 포함되어 있습니다.');
+  }
+}
+
 export const Dashboard: React.FC = () => {
+  const queryClient = useQueryClient();
   const [isAnalyzed, setIsAnalyzed] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'viewer'>('overview');
   const [selectedRiskId, setSelectedRiskId] = useState<string>('');
@@ -79,51 +166,178 @@ export const Dashboard: React.FC = () => {
   const [uploadStep, setUploadStep] = useState<number>(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
+  const [uploadMeta, setUploadMeta] = useState<UploadMeta | null>(null);
   const [apiContract, setApiContract] = useState<ContractData | null>(null);
   const [apiScreening, setApiScreening] = useState<ScreeningResult | null>(null);
-  const screeningMutation = useScreeningMutation();
+  const startScreeningMutation = useStartScreening();
+  const jobStatusQuery = useJobStatus(jobId);
+  const screeningResultQuery = useScreeningResult(jobId, jobStatusQuery.data?.status);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const finishUploadTimerRef = useRef<number | null>(null);
+  const shineBlockTimerRef = useRef<number | null>(null);
+  const flowVersionRef = useRef(0);
+  const isUnmountedRef = useRef(false);
   const [diffViewMode, setDiffViewMode] = useState<'side-by-side' | 'redline'>('redline');
   const [shineBlockId, setShineBlockId] = useState<string | null>(null);
   const [blocks, setBlocks] = useState<ContractBlock[]>([]);
+  const currentJobIdRef = useRef<string | null>(null);
+  const pollingProgress = jobStatusQuery.data?.progress ?? 0;
+  const progressPercent = isUploading ? Math.max((uploadStep - 1) * 25, pollingProgress) : 0;
+  const currentNode = jobStatusQuery.data?.current_node;
+  const currentNodeLabel = currentNode ? JOB_NODE_LABELS[currentNode] ?? currentNode : null;
+
+  const clearPendingTimers = () => {
+    if (finishUploadTimerRef.current !== null) {
+      window.clearTimeout(finishUploadTimerRef.current);
+      finishUploadTimerRef.current = null;
+    }
+    if (shineBlockTimerRef.current !== null) {
+      window.clearTimeout(shineBlockTimerRef.current);
+      shineBlockTimerRef.current = null;
+    }
+  };
+
+  const canApplyUploadState = () => !isUnmountedRef.current;
+
+  useEffect(() => {
+    currentJobIdRef.current = jobId;
+  }, [jobId]);
 
   const finishUploadUi = () => {
+    if (!canApplyUploadState()) return;
+    clearPendingTimers();
     setUploadStep(5);
     setIsUploading(false);
     setUploadSuccess(true);
-    setTimeout(() => {
+    finishUploadTimerRef.current = window.setTimeout(() => {
+      if (!canApplyUploadState()) return;
       setUploadSuccess(false);
       setUploadStep(0);
+      finishUploadTimerRef.current = null;
     }, 3000);
   };
 
+  useEffect(() => {
+    return () => {
+      isUnmountedRef.current = true;
+      flowVersionRef.current += 1;
+      startScreeningMutation.cancelStartRequest();
+      void clearScreeningQueries(queryClient, currentJobIdRef.current);
+      clearPendingTimers();
+    };
+  }, [queryClient, startScreeningMutation.cancelStartRequest]);
+
+  useEffect(() => {
+    const status = jobStatusQuery.data;
+    if (!isUploading || !jobId || !status || status.job_id !== jobId) return;
+    if (!canApplyUploadState()) return;
+
+    if (status.status === 'failed') {
+      setIsUploading(false);
+      setUploadStep(0);
+      setUploadError(status.error || '계약서 분석 작업이 실패했습니다.');
+      return;
+    }
+
+    if (status.status === 'processing') {
+      const nextStep = Math.min(4, Math.max(2, Math.ceil(status.progress / 25)));
+      setUploadStep(nextStep);
+    }
+  }, [isUploading, jobId, jobStatusQuery.data]);
+
+  useEffect(() => {
+    if (!jobStatusQuery.error || !isUploading || !jobId) return;
+    if (!canApplyUploadState()) return;
+    if (isAbortRequestError(jobStatusQuery.error) || isTimeoutRequestError(jobStatusQuery.error)) {
+      return;
+    }
+    setIsUploading(false);
+    setUploadStep(0);
+    setUploadError(
+      jobStatusQuery.error instanceof Error
+        ? jobStatusQuery.error.message
+        : '스크리닝 작업 상태를 확인하지 못했습니다.',
+    );
+  }, [isUploading, jobId, jobStatusQuery.error]);
+
+  useEffect(() => {
+    if (!screeningResultQuery.error || !isUploading || !jobId) return;
+    if (!canApplyUploadState()) return;
+    if (
+      isAbortRequestError(screeningResultQuery.error) ||
+      isTimeoutRequestError(screeningResultQuery.error)
+    ) {
+      return;
+    }
+    setIsUploading(false);
+    setUploadStep(0);
+    setUploadError(
+      screeningResultQuery.error instanceof Error
+        ? screeningResultQuery.error.message
+        : '스크리닝 결과를 불러오지 못했습니다.',
+    );
+  }, [isUploading, jobId, screeningResultQuery.error]);
+
+  useEffect(() => {
+    const screening = screeningResultQuery.data;
+    if (!screening || !uploadMeta || !jobId || screening.job_id !== jobId) return;
+    if (apiScreening?.job_id === screening.job_id) return;
+    if (!canApplyUploadState()) return;
+
+    setUploadStep(4);
+    setApiScreening(screening);
+    const mapped = mapResultToContractData(screening, uploadMeta);
+    setApiContract(mapped);
+    setBlocks(buildBlocksFromContract(mapped));
+    if (mapped.risks[0]) setSelectedRiskId(mapped.risks[0].id);
+    finishUploadUi();
+    setIsAnalyzed(true);
+    setActiveTab('overview');
+  }, [apiScreening?.job_id, jobId, screeningResultQuery.data, uploadMeta]);
+
   const runUploadFlow = async (file: File) => {
     if (isUploading) return;
+    const flowVersion = flowVersionRef.current + 1;
+    flowVersionRef.current = flowVersion;
+    clearPendingTimers();
+    setUploadError(null);
+    try {
+      await validateUploadFile(file);
+    } catch (err) {
+      if (isUnmountedRef.current || flowVersionRef.current !== flowVersion) return;
+      setUploadStep(0);
+      setUploadSuccess(false);
+      setUploadError(
+        err instanceof Error ? err.message : '업로드할 수 없는 파일입니다.',
+      );
+      return;
+    }
+
     setIsUploading(true);
     setUploadStep(1);
     setUploadSuccess(false);
-    setUploadError(null);
+    await clearScreeningQueries(queryClient, currentJobIdRef.current);
+    if (isUnmountedRef.current || flowVersionRef.current !== flowVersion) return;
+    setJobId(null);
+    setUploadMeta(null);
     try {
       setUploadStep(2);
-      const data = await screeningMutation.mutateAsync(file);
-      setUploadStep(3);
+      const data = await startScreeningMutation.mutateAsync(file);
+      if (isUnmountedRef.current || flowVersionRef.current !== flowVersion) return;
       setJobId(data.upload.job_id);
-      setApiScreening(data.screening);
-      const mapped = mapResultToContractData(data.screening, data.uploadMeta);
-      setApiContract(mapped);
-      setBlocks(buildBlocksFromContract(mapped));
-      if (mapped.risks[0]) setSelectedRiskId(mapped.risks[0].id);
-      console.log('[Deepgle] screening result', data.screening);
-      setUploadStep(4);
-      finishUploadUi();
-      setIsAnalyzed(true);
-      setActiveTab('overview');
+      setUploadMeta(data.uploadMeta);
     } catch (err) {
-      console.error('[Deepgle] upload/screen failed', err);
+      if (isUnmountedRef.current || flowVersionRef.current !== flowVersion) return;
+      if (isAbortRequestError(err)) return;
       setIsUploading(false);
       setUploadStep(0);
+      const message = isTimeoutRequestError(err)
+        ? '업로드 요청 시간이 초과되었습니다. 네트워크 상태를 확인한 뒤 다시 시도해 주세요.'
+        : err instanceof Error
+          ? err.message
+          : '업로드 또는 스크리닝에 실패했습니다.';
       setUploadError(
-        err instanceof Error ? err.message : '업로드 또는 스크리닝에 실패했습니다.',
+        message,
       );
     }
   };
@@ -148,17 +362,24 @@ export const Dashboard: React.FC = () => {
 
   // Reset to home view to analyze another contract
   const handleReset = () => {
+    flowVersionRef.current += 1;
+    startScreeningMutation.cancelStartRequest();
+    void clearScreeningQueries(queryClient, currentJobIdRef.current);
+    clearPendingTimers();
+    setShineBlockId(null);
     setIsAnalyzed(false);
     setApiContract(null);
     setApiScreening(null);
     setJobId(null);
+    setUploadMeta(null);
+    setIsUploading(false);
     setBlocks([]);
     setSelectedRiskId('');
     setSearchTerm('');
     setUploadStep(0);
     setUploadSuccess(false);
     setUploadError(null);
-    screeningMutation.reset();
+    startScreeningMutation.reset();
   };
 
   // Direct edit: apply AI recommendation to the document block text
@@ -180,9 +401,14 @@ export const Dashboard: React.FC = () => {
     }));
 
     // Trigger visual shine micro-animation on the document block
+    if (shineBlockTimerRef.current !== null) {
+      window.clearTimeout(shineBlockTimerRef.current);
+    }
     setShineBlockId(riskId);
-    setTimeout(() => {
+    shineBlockTimerRef.current = window.setTimeout(() => {
+      if (!canApplyUploadState()) return;
       setShineBlockId(null);
+      shineBlockTimerRef.current = null;
     }, 1000);
   };
 
@@ -200,6 +426,78 @@ export const Dashboard: React.FC = () => {
     }));
   };
 
+  const contractRisks = apiContract?.risks ?? EMPTY_RISKS;
+
+  const blocksByRiskId = useMemo(() => {
+    const map = new Map<string, ContractBlock>();
+    for (const block of blocks) {
+      if (block.riskId) map.set(block.riskId, block);
+    }
+    return map;
+  }, [blocks]);
+
+  const risksById = useMemo(() => {
+    const map = new Map<string, ContractData['risks'][number]>();
+    for (const risk of contractRisks) {
+      map.set(risk.id, risk);
+    }
+    return map;
+  }, [contractRisks]);
+
+  const activeRisks = useMemo(() => (
+    contractRisks.filter(risk => {
+      const block = blocksByRiskId.get(risk.id);
+      return block && !block.isResolved;
+    })
+  ), [blocksByRiskId, contractRisks]);
+
+  const resolvedCount = useMemo(
+    () => blocks.filter(block => block.isRisk && block.isResolved).length,
+    [blocks],
+  );
+
+  const highRiskCount = useMemo(
+    () => apiScreening?.high_risk_count ?? activeRisks.filter(risk => risk.severity === 'high').length,
+    [activeRisks, apiScreening?.high_risk_count],
+  );
+  const mediumRiskCount = useMemo(
+    () => apiScreening?.medium_risk_count ?? activeRisks.filter(risk => risk.severity === 'medium').length,
+    [activeRisks, apiScreening?.medium_risk_count],
+  );
+  const lowRiskCount = useMemo(
+    () => apiScreening?.low_risk_count ?? activeRisks.filter(risk => risk.severity === 'low').length,
+    [activeRisks, apiScreening?.low_risk_count],
+  );
+
+  const safetyScore = useMemo(() => {
+    const maxScore = 100;
+    const penalty = highRiskCount * 25 + mediumRiskCount * 12 + lowRiskCount * 5;
+    return apiScreening?.safety_score ?? Math.max(0, maxScore - penalty);
+  }, [apiScreening?.safety_score, highRiskCount, lowRiskCount, mediumRiskCount]);
+
+  const scoreInfo = useMemo(() => getScoreInfo(safetyScore), [safetyScore]);
+
+  const selectedRisk = risksById.get(selectedRiskId);
+  const selectedBlock = blocksByRiskId.get(selectedRiskId);
+
+  const filteredRisksList = useMemo(() => {
+    const query = searchTerm.toLowerCase();
+    if (!query) return contractRisks;
+    return contractRisks.filter(risk => (
+      risk.clauseName.toLowerCase().includes(query) ||
+      risk.summary.toLowerCase().includes(query) ||
+      risk.category.toLowerCase().includes(query)
+    ));
+  }, [contractRisks, searchTerm]);
+
+  const selectedDiffParts = useMemo(() => {
+    if (activeTab !== 'viewer' || diffViewMode !== 'redline') return null;
+    if (!selectedBlock?.originalText || !selectedRisk?.recommendation) return null;
+
+    const origClean = selectedBlock.originalText.replace(/^(\d+\.\s+)/, '');
+    return computeWordDiff(origClean, selectedRisk.recommendation);
+  }, [activeTab, diffViewMode, selectedBlock?.originalText, selectedRisk?.recommendation]);
+
   if (!isAnalyzed) {
     return (
       <div className="w-full max-w-4xl mx-auto space-y-12 py-8 animate-fade-in-up">
@@ -210,10 +508,10 @@ export const Dashboard: React.FC = () => {
             AI 법률 스크리닝 플랫폼
           </div>
           <h1 className="text-4xl font-extrabold text-slate-900 leading-tight tracking-tight">
-            계약서 검토를 더 쉽고, 빠르고, 안전하게
+            계약서 검토를 더 쉽고, 빠르게
           </h1>
           <p className="text-sm text-slate-600 max-w-xl mx-auto leading-relaxed">
-            비밀유지계약서(NDA) 등 상거래 계약서를 업로드해 보세요. AI 엔진이 독소 조항과 면책 범위를 분석하여 실시간 대안 문구를 제안합니다.
+            비밀유지계약서(NDA) 등 상거래 계약서를 업로드해 보세요. 민감 정보 마스킹 후 AI가 독소 조항과 면책 범위를 분석하고 수정 권고안을 제안합니다. 본 결과는 법무 검토 보조를 위한 AI 분석 결과입니다.
           </p>
         </div>
 
@@ -227,7 +525,7 @@ export const Dashboard: React.FC = () => {
                 </div>
                 <CardTitle className="text-xl font-bold text-slate-800">계약서 파일 분석 시작하기</CardTitle>
                 <CardDescription className="text-xs leading-relaxed max-w-md mx-auto mt-1">
-                  PDF, DOCX 등의 계약서 파일을 드래그 앤 드롭하거나 아래 영역을 클릭하여 업로드하면 AI 법률 분석 검토 프로세스가 시작됩니다.
+                  PDF, DOCX, TXT 파일을 업로드하면 마스킹·법률 스크리닝·수정 권고 생성 단계가 순차적으로 실행됩니다.
                 </CardDescription>
               </CardHeader>
 
@@ -275,7 +573,7 @@ export const Dashboard: React.FC = () => {
                   <div className="flex flex-col items-start w-full gap-4 py-2 px-1 select-none animate-slide-in">
                     <div className="flex items-center gap-2 w-full justify-center">
                       <RefreshCw className="w-4 h-4 text-navy-800 animate-spin shrink-0" />
-                      <span className="text-xs font-bold text-slate-700">AI 정밀 계약서 분석 중...</span>
+                      <span className="text-xs font-bold text-slate-700">민감 정보 마스킹 및 AI 계약서 분석 중...</span>
                     </div>
                     {/* Shimmering Timeline Steps */}
                     <div className="space-y-3.5 w-full max-w-md mx-auto text-left py-2">
@@ -286,7 +584,7 @@ export const Dashboard: React.FC = () => {
                           {uploadStep > 1 ? <Check className="w-3 h-3" /> : '1'}
                         </span>
                         <span className={`text-[11.5px] font-semibold transition-colors duration-300 ${uploadStep === 1 ? 'text-navy-800' : uploadStep > 1 ? 'text-slate-400' : 'text-slate-300'}`}>
-                          계약서 구조 파악 및 문서 벡터화
+                          계약서 구조 파악 및 민감 정보 마스킹
                         </span>
                       </div>
                       
@@ -319,14 +617,19 @@ export const Dashboard: React.FC = () => {
                           {uploadStep > 4 ? <Check className="w-3 h-3" /> : '4'}
                         </span>
                         <span className={`text-[11.5px] font-semibold transition-colors duration-300 ${uploadStep === 4 ? 'text-navy-800' : 'text-slate-300'}`}>
-                          AI 최적 수정 권고 조항 최종 검토
+                          AI 수정 권고안 생성 및 검토
                         </span>
                       </div>
                     </div>
                     {/* Shimmer line bar */}
                     <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden mt-1 max-w-md mx-auto">
-                      <div className="bg-navy-800 h-full transition-all duration-300" style={{ width: `${(uploadStep - 1) * 25}%` }}></div>
+                      <div className="bg-navy-800 h-full transition-all duration-300" style={{ width: `${progressPercent}%` }}></div>
                     </div>
+                    {currentNodeLabel && (
+                      <div className="w-full max-w-md mx-auto text-[11px] text-slate-500 font-semibold text-center">
+                        현재 단계: {currentNodeLabel}
+                      </div>
+                    )}
                   </div>
                 ) : uploadSuccess ? (
                   <div className="flex flex-col items-center gap-3 py-6 animate-scale-in">
@@ -342,15 +645,15 @@ export const Dashboard: React.FC = () => {
                   <div className="flex flex-col items-center justify-center py-10">
                     <FileText className="w-12 h-12 text-slate-400 group-hover:text-navy-800 group-hover:scale-105 transition-all duration-300 mb-4" />
                     <span className="text-sm font-bold text-slate-800">마우스 클릭 또는 드래그하여 계약서 업로드</span>
-                    <span className="text-[11px] text-slate-500 mt-2">지원 형식: PDF, DOCX, TXT (최대 10MB)</span>
+                    <span className="text-[11px] text-slate-500 mt-2">지원 형식: PDF, DOCX, TXT (최대 10MB) · 데모 환경</span>
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-100 mt-6 flex items-center justify-center gap-1.5 text-xs text-slate-600 font-semibold">
+            <div className="pt-4 border-t border-slate-100 mt-6 flex items-center justify-center gap-1.5 text-xs text-slate-600 font-semibold text-center leading-relaxed">
               <Info className="w-4 h-4 text-navy-800 shrink-0" />
-              <span>보안 규정: 민감 계약 정보 암호화 처리 및 외부 서버 비저장</span>
+              <span>민감 정보 마스킹 후 AI 분석을 수행합니다. 데모 환경에서는 업로드 문서가 일시적으로 메모리에 보관될 수 있습니다.</span>
             </div>
           </Card>
         </div>
@@ -373,7 +676,7 @@ export const Dashboard: React.FC = () => {
             </div>
             <h3 className="font-bold text-slate-900 text-sm">AI 맞춤 수정 권고</h3>
             <p className="text-xs text-slate-500 leading-relaxed">
-              상법 및 표준 계약서를 바탕으로 즉시 반영 가능한 고품질 합의안을 작성합니다.
+              상법 및 표준 계약서를 참고하여 검토에 활용할 수 있는 수정 권고안을 제안합니다.
             </p>
           </div>
 
@@ -393,7 +696,7 @@ export const Dashboard: React.FC = () => {
             </div>
             <h3 className="font-bold text-slate-900 text-sm">안전성 점수 진단</h3>
             <p className="text-xs text-slate-500 leading-relaxed">
-              리스크 심각도를 합산하여 직관적인 계약 종합 안전 점수(0~100점)를 계산합니다.
+              리스크 심각도를 합산한 계약 리스크 점수(0~100)입니다. AI 분석 결과이며 최종 법적 판단을 대체하지 않습니다.
             </p>
           </div>
         </div>
@@ -422,54 +725,12 @@ export const Dashboard: React.FC = () => {
 
   const contract = apiContract;
 
-  const activeRisks = contract.risks.filter(r => {
-    const block = blocks.find(b => b.riskId === r.id);
-    return block && !block.isResolved;
-  });
-
-  const resolvedCount = blocks.filter(b => b.isRisk && b.isResolved).length;
-
-  const highRiskCount =
-    apiScreening.high_risk_count ?? activeRisks.filter(r => r.severity === 'high').length;
-  const mediumRiskCount =
-    apiScreening.medium_risk_count ?? activeRisks.filter(r => r.severity === 'medium').length;
-  const lowRiskCount =
-    apiScreening.low_risk_count ?? activeRisks.filter(r => r.severity === 'low').length;
-
-  const maxScore = 100;
-  const penalty = highRiskCount * 25 + mediumRiskCount * 12 + lowRiskCount * 5;
-  const safetyScore = apiScreening.safety_score ?? Math.max(0, maxScore - penalty);
-
   const radius = 42;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (safetyScore / 100) * circumference;
 
-  const getScoreInfo = (score: number) => {
-    if (score >= 90) return { label: '최상 (Excellent)', color: 'text-emerald-600', stroke: '#10b981' };
-    if (score >= 70) return { label: '양호 (Good)', color: 'text-sky-600', stroke: '#3b82f6' };
-    if (score >= 50) return { label: '주의 (Caution)', color: 'text-amber-600', stroke: '#f59e0b' };
-    return { label: '위험 (Warning)', color: 'text-rose-600', stroke: '#ef4444' };
-  };
-
-  const scoreInfo = getScoreInfo(safetyScore);
-
-  const selectedRisk = contract.risks.find(r => r.id === selectedRiskId);
-  const selectedBlock = blocks.find(b => b.riskId === selectedRiskId);
-
-  const filteredRisksList = contract.risks.filter(r => {
-    const query = searchTerm.toLowerCase();
-    return (
-      r.clauseName.toLowerCase().includes(query) ||
-      r.summary.toLowerCase().includes(query) ||
-      r.category.toLowerCase().includes(query)
-    );
-  });
-
-  const renderWordDiff = (original: string, modified: string) => {
-    if (!original || !modified) return null;
-
-    const origClean = original.replace(/^(\d+\.\s+)/, '');
-    const diffs = computeWordDiff(origClean, modified);
+  const renderWordDiff = (diffs: WordDiffPart[] | null) => {
+    if (!diffs) return null;
 
     return (
       <div className="p-4 bg-slate-50/70 border border-slate-200/80 rounded-xl text-[13px] font-sans text-slate-800 leading-relaxed max-h-72 overflow-y-auto tracking-normal whitespace-pre-wrap select-text shadow-inner">
@@ -508,7 +769,7 @@ export const Dashboard: React.FC = () => {
             {koreanHeadings.dashboardTitle}
           </h1>
           <p className="text-sm text-slate-600 mt-1">
-            NDA 및 상거래 계약서 내 독소 조항과 배상 한도를 실시간 검출하고 최적의 대안 합의안을 작성합니다.
+            NDA 및 상거래 계약서의 독소 조항·배상 한도를 AI가 검출하고 수정 권고안을 제시합니다. 법무 검토 보조를 위한 참고 자료입니다.
           </p>
         </div>
 
@@ -570,7 +831,7 @@ export const Dashboard: React.FC = () => {
                   <CardTitle className="text-base font-bold text-slate-800">계약 안전성 종합 레포트</CardTitle>
                 </div>
                 <CardDescription className="text-xs">
-                  검출된 리스크 가중치(위험도)를 정량 계산한 실시간 보안 신뢰 점수입니다.
+                  검출된 리스크 심각도를 기준으로 계산한 계약 리스크 점수입니다. 법무 검토 보조를 위한 AI 분석 결과이며 최종 법적 판단을 대체하지 않습니다.
                 </CardDescription>
               </CardHeader>
               
@@ -614,8 +875,8 @@ export const Dashboard: React.FC = () => {
                     {scoreInfo.label}
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                    {safetyScore === 100 
-                      ? "검출된 계약 리스크가 존재하지 않아 아주 안전합니다." 
+                    {safetyScore === 100
+                      ? "검출된 계약 리스크가 없어 상대적으로 양호한 수준으로 보입니다."
                       : `고위험 요인을 포함하여 총 ${activeRisks.length}개의 리스크가 검출되었습니다.`
                     }
                   </p>
@@ -721,7 +982,7 @@ export const Dashboard: React.FC = () => {
                     API 스크리닝 보고서 (백엔드)
                   </CardTitle>
                   <CardDescription className="text-xs">
-                    POST /api/screen 결과의 output_report 미리보기입니다.
+                    POST /api/screen 결과의 output_report 미리보기입니다. 법무 검토 보조를 위한 AI 분석 결과입니다.
                   </CardDescription>
                 </CardHeader>
                 <pre className="text-[11px] leading-relaxed p-4 rounded-xl bg-white border border-slate-200 max-h-40 overflow-y-auto whitespace-pre-wrap font-sans text-slate-700">
@@ -766,7 +1027,7 @@ export const Dashboard: React.FC = () => {
                 </TableHeader>
                 <TableBody>
                   {filteredRisksList.map((risk) => {
-                    const block = blocks.find(b => b.riskId === risk.id);
+                    const block = blocksByRiskId.get(risk.id);
                     const isResolved = block?.isResolved;
 
                     return (
@@ -850,10 +1111,10 @@ export const Dashboard: React.FC = () => {
       {/* VIEW 2: HIGH-FIDELITY SCREENING VIEWER */}
       {activeTab === 'viewer' && (
         <div className="space-y-6 animate-fade-in-up">
-          {apiScreening?.contract_masked && (
+          {contract.maskedText && (
             <MaskingCompare
               originalText={contract.fullText}
-              maskedText={apiScreening.contract_masked}
+              maskedText={contract.maskedText}
             />
           )}
         <div className="grid lg:grid-cols-12 gap-8 items-start">
@@ -898,7 +1159,7 @@ export const Dashboard: React.FC = () => {
                   );
                 }
 
-                const risk = contract.risks.find(r => r.id === block.riskId);
+                const risk = block.riskId ? risksById.get(block.riskId) : undefined;
                 const isSelected = selectedRiskId === block.riskId;
                 const isShining = shineBlockId === block.riskId;
                 
@@ -1065,7 +1326,7 @@ export const Dashboard: React.FC = () => {
                         <Sparkles className="w-3.5 h-3.5 text-navy-800 shrink-0" />
                         AI 자동 수정 권고 레드라인 (단어 비교)
                       </span>
-                      {selectedRisk && selectedBlock && renderWordDiff(selectedBlock.originalText || '', selectedRisk.recommendation)}
+                      {selectedRisk && selectedBlock && renderWordDiff(selectedDiffParts)}
                     </div>
                   )}
                 </div>

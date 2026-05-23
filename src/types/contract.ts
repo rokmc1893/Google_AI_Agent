@@ -15,5 +15,6 @@ export interface ContractData {
   type: string;
   lastUpdated: string;
   fullText: string;
+  maskedText?: string | null;
   risks: LegalRisk[];
 }

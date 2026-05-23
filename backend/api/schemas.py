@@ -53,11 +53,28 @@ class ScreenResponse(BaseModel):
     status: JobStatus
 
 
+class JobStatusResponse(BaseModel):
+    job_id: str
+    status: JobStatus
+    progress: int = 0
+    current_node: str | None = None
+    error: str | None = None
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
+
+
 class RetrievedDoc(BaseModel):
     id: str = ""
     category: str = ""
     clause: str = ""
     content: str = ""
+
+
+class ClauseAnchor(BaseModel):
+    clause_id: str | None = None
+    heading: str | None = None
+    start_offset: int | None = None
+    end_offset: int | None = None
 
 
 class RiskIssue(BaseModel):
@@ -66,9 +83,12 @@ class RiskIssue(BaseModel):
     clause_text: str = ""
     risk_level: RiskLevel = "MEDIUM"
     description: str = ""
+    recommendation: str = ""
+    replacement_clause: str | None = None
     legal_basis: str | None = None
     legal_basis_text: str | None = None
     citations: list[str] = Field(default_factory=list)
+    clause_anchor: ClauseAnchor | None = None
 
 
 class ScreeningResult(BaseModel):
@@ -79,6 +99,8 @@ class ScreeningResult(BaseModel):
     retrieved_docs: list[RetrievedDoc] = Field(default_factory=list)
     output_report: str = ""
     output_email: str = ""
+    full_text: str = ""
+    masked_text: str | None = None
     contract_masked: str | None = None
     high_risk_count: int = 0
     medium_risk_count: int = 0

@@ -13,9 +13,9 @@ export const MaskingCompare: React.FC<MaskingCompareProps> = ({ originalText, ma
   return (
     <Card variant="dashboard" className="p-5 border border-slate-200/80">
       <CardHeader className="p-0 mb-4">
-        <CardTitle className="text-sm font-bold text-slate-800">PII 마스킹 Side-by-Side</CardTitle>
+        <CardTitle className="text-sm font-bold text-slate-800">민감 정보 마스킹 비교</CardTitle>
         <CardDescription className="text-xs">
-          외부 LLM 전송 전 마스킹된 텍스트와 업로드 원문 미리보기를 비교합니다.
+          AI 분석에 사용되는 마스킹 텍스트와 원문 미리보기를 비교합니다. 마스킹은 개인정보 보호를 위한 best-effort 조치이며, 모든 민감 정보가 제거된다고 보장되지는 않습니다.
         </CardDescription>
       </CardHeader>
       <div className="grid md:grid-cols-2 gap-4">
@@ -29,7 +29,7 @@ export const MaskingCompare: React.FC<MaskingCompareProps> = ({ originalText, ma
           </pre>
         </div>
         <div className="space-y-2">
-          <div className="text-[10px] font-bold uppercase tracking-wide text-amber-700">Masked (API 전송용)</div>
+          <div className="text-[10px] font-bold uppercase tracking-wide text-amber-700">마스킹 후 AI 분석용</div>
           <pre className="text-[11px] leading-relaxed p-3 rounded-lg bg-amber-50/50 border border-amber-200/80 max-h-48 overflow-y-auto whitespace-pre-wrap font-sans text-slate-800">
             {maskedText.slice(0, 1500)}
             {maskedText.length > 1500 ? '…' : ''}

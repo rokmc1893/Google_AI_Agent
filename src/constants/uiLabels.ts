@@ -13,7 +13,7 @@ export const koreanHeadings = {
   summary: '요약',
   originalText: '계약서 본문 조항',
   recommendation: 'AI 추천 수정 조항',
-  analysisDetail: '법률 분석 상세 리포트',
+  analysisDetail: '법무 검토 보조를 위한 AI 분석 상세',
   remedyCost: '조치 난이도/비용',
   riskOverview: '리스크 오버뷰',
   uploadContract: '계약서 스크리닝 분석 요청',

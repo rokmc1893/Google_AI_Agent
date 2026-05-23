@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, File, UploadFile
 
 from backend.api.schemas import UploadResponse
@@ -10,12 +12,13 @@ router = APIRouter()
 
 
 @router.post("/upload", response_model=UploadResponse)
-async def upload_contract(file: UploadFile = File(...)) -> UploadResponse:
+async def upload_contract(file: Annotated[UploadFile, File(...)]) -> UploadResponse:
     settings = get_settings()
     parsed = await parse_upload(file, settings.max_upload_bytes)
 
     # 저장용: parse_upload 내부에서 이미 read됨 → job_store는 텍스트만 저장해도 Phase1 충분
     store = get_job_store()
+    _ = store.cleanup_expired_jobs(settings.job_ttl_minutes)
     record = store.create(
         filename=parsed.filename,
         file_type=parsed.file_type,

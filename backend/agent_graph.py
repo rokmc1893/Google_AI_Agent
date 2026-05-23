@@ -54,10 +54,10 @@ class LegalScreeningPipeline:
             from backend.graph.workflow import compile_screening_graph
 
             self._compiled_graph = compile_screening_graph(self)
-            print("[LangGraph] StateGraph 컴파일 완료 - invoke 모드")
+            logger.info("[LangGraph] StateGraph compiled (invoke mode)")
 
     def parse_contract_node(self, state: AgentState) -> AgentState:
-        print("[Node: Parser] 계약서 파싱 및 구조화 시작...")
+        logger.info("[Node: Parser] start")
         raw = state["contract_raw"]
         parsed = "\n".join([line.strip() for line in raw.split("\n") if line.strip()])
         state["contract_parsed"] = parsed
@@ -65,7 +65,7 @@ class LegalScreeningPipeline:
         return state
 
     def mask_pii_node(self, state: AgentState) -> AgentState:
-        print("[Node: Masker] 외부 전송 전 계약서 기밀 정보 마스킹 중...")
+        logger.info("[Node: Masker] start")
         parsed = state["contract_parsed"]
         masked = self.masker.mask(parsed)
         state["contract_masked"] = masked
@@ -74,7 +74,7 @@ class LegalScreeningPipeline:
         return state
 
     def retrieve_law_context_node(self, state: AgentState) -> AgentState:
-        print("[Node: LawContext] 법령 API + RAG 맥락 수집 중...")
+        logger.info("[Node: LawContext] start")
         try:
             ctx = build_law_context(
                 state["contract_masked"],
@@ -88,13 +88,14 @@ class LegalScreeningPipeline:
                 existing_ids = {d.get("id") for d in state["retrieved_docs"]}
                 if doc.get("id") not in existing_ids:
                     state["retrieved_docs"].append(doc)
-            print(
-                f"[Node: LawContext] OK laws={len(state['related_laws'])} "
-                f"chunks={len(state['retrieved_chunks'])} context_len={len(state['law_context'])}"
+            logger.info(
+                "[Node: LawContext] done laws=%s chunks=%s context_len=%s",
+                len(state["related_laws"]),
+                len(state["retrieved_chunks"]),
+                len(state["law_context"]),
             )
-        except Exception as exc:
-            logger.warning("[Node: LawContext] fallback empty: %s", exc)
-            print(f"[Node: LawContext] fallback ({exc})")
+        except Exception:
+            logger.warning("[Node: LawContext] fallback empty", exc_info=True)
             state["law_context"] = ""
             state["related_laws"] = []
             state["retrieved_chunks"] = []
@@ -167,28 +168,27 @@ class LegalScreeningPipeline:
         return normalized
 
     def screen_issues_node(self, state: AgentState) -> AgentState:
-        print("[Node: Screener] 마스킹된 텍스트 기반 독소 조항 1차 스크리닝 중...")
+        logger.info("[Node: Screener] start")
         masked = state["contract_masked"]
         law_context = state.get("law_context", "")
 
         if self.llm.enabled:
             try:
                 mode = "Gemini+RAG" if law_context.strip() else "Gemini"
-                print(f"[Node: Screener] {mode} LLM 스크리닝")
+                logger.info("[Node: Screener] mode=%s", mode)
                 state["issues"] = self._screen_issues_llm(masked, law_context)
-            except Exception as exc:
-                logger.warning("LLM 스크리닝 실패, 규칙 fallback: %s", exc)
-                print(f"[Node: Screener] LLM 실패 → 규칙 fallback ({exc})")
+            except Exception:
+                logger.warning("LLM screening failed, fallback to rules", exc_info=True)
                 state["issues"] = self._screen_issues_rules(masked)
         else:
-            print("[Node: Screener] 규칙 기반 스크리닝 (LLM 비활성)")
+            logger.info("[Node: Screener] rules mode (LLM disabled)")
             state["issues"] = self._screen_issues_rules(masked)
 
         state["current_node"] = "screener"
         return state
 
     def retrieve_laws_node(self, state: AgentState) -> AgentState:
-        print("[Node: RAG_Retriever] 관련 법령 및 사내 규정 조회 중...")
+        logger.info("[Node: RAG_Retriever] start")
         issues = state["issues"]
         all_retrieved = list(state.get("retrieved_docs", []))
 
@@ -202,7 +202,7 @@ class LegalScreeningPipeline:
         return state
 
     def verify_with_sources_node(self, state: AgentState) -> AgentState:
-        print("[Node: Guardrail] 소스 일치 여부 팩트체크 및 가드레일 적용 중...")
+        logger.info("[Node: Guardrail] start")
         issues = state["issues"]
         retrieved_docs = state["retrieved_docs"]
 
@@ -313,7 +313,7 @@ class LegalScreeningPipeline:
         return report, email
 
     def generate_report_and_email_node(self, state: AgentState) -> AgentState:
-        print("[Node: Generator] 분석 보고서 및 메일 초안 작성 중...")
+        logger.info("[Node: Generator] start")
         issues = state["verified_issues"]
 
         if not issues:
@@ -321,13 +321,12 @@ class LegalScreeningPipeline:
             state["email_draft"] = "제목: [검토 완료] 계약서 1차 스크리닝 결과 회신\n\n특이 수정 요청 사항 없이 검토를 마쳤습니다."
         elif self.llm.enabled:
             try:
-                print("[Node: Generator] Gemini LLM 보고서·메일 생성 (RAG grounded)")
+                logger.info("[Node: Generator] LLM grounded mode")
                 report, email = self._generate_report_llm(state)
                 state["final_report"] = report
                 state["email_draft"] = email
-            except Exception as exc:
-                logger.warning("LLM 보고서 생성 실패, 규칙 fallback: %s", exc)
-                print(f"[Node: Generator] LLM 실패 → 규칙 fallback ({exc})")
+            except Exception:
+                logger.warning("LLM report generation failed, fallback to rules", exc_info=True)
                 report, email = self._generate_report_rules(state)
                 state["final_report"] = report
                 state["email_draft"] = email
@@ -340,7 +339,7 @@ class LegalScreeningPipeline:
         return state
 
     def demask_results_node(self, state: AgentState) -> AgentState:
-        print("[Node: Demasker] 최종 산출물 내 마스킹 정보 복원 중...")
+        logger.info("[Node: Demasker] start")
         self.masker.de_mask_map = state["masking_map"]
         state["output_report"] = self.masker.unmask(state["final_report"])
         state["output_email"] = self.masker.unmask(state["email_draft"])
@@ -391,14 +390,14 @@ class LegalScreeningPipeline:
         state = self._initial_state(raw_contract)
 
         if self._compiled_graph is not None:
-            print("[LangGraph] graph.invoke() 실행...")
+            logger.info("[LangGraph] graph.invoke() start")
             result = self._compiled_graph.invoke(state)
-            print("LangGraph 파이프라인 처리 완료! (StateGraph)")
+            logger.info("[LangGraph] pipeline done (StateGraph)")
             return result
 
-        print("[LangGraph] 수동 파이프라인 fallback (USE_LANGGRAPH=false 또는 미설치)")
+        logger.info("[LangGraph] manual fallback (USE_LANGGRAPH=false or unavailable)")
         result = self._run_manual(state)
-        print("LangGraph 파이프라인 처리 완료! (manual)")
+        logger.info("[LangGraph] pipeline done (manual)")
         return result
 
 
