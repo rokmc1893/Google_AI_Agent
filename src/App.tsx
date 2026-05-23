@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Dashboard } from './views/Dashboard';
-import { Scale, ShieldCheck, Heart } from 'lucide-react';
+import { Scale, ShieldCheck } from 'lucide-react';
 
 function App() {
   const [dashboardKey, setDashboardKey] = useState(0);
@@ -24,7 +24,7 @@ function App() {
                 Deepgle <span className="font-medium text-slate-600">Legal</span>
               </span>
               <span className="block text-xs tracking-wide text-slate-500 font-medium -mt-0.5">
-                AI 법률 스크리닝 어시스턴트
+                계약 분석 시스템
               </span>
             </div>
           </button>
@@ -41,13 +41,8 @@ function App() {
             <ShieldCheck className="w-4 h-4 text-navy-800" />
             <span>&copy; {new Date().getFullYear()} Deepgle Legal. All rights reserved.</span>
           </div>
-          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
-            <span className="text-slate-500">데모 환경 · 법무 검토 보조용 AI 분석</span>
-            <div className="flex items-center gap-1.5">
-              <span>법률 전문가들을 위해</span>
-              <Heart className="w-3 h-3 text-rose-500 fill-rose-500" />
-              <span>제작되었습니다.</span>
-            </div>
+          <div className="flex items-center">
+            <span className="text-slate-500">법무 검토 보조용 AI 계약 분석 시스템</span>
           </div>
         </div>
       </footer>

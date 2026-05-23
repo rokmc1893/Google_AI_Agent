@@ -1,6 +1,6 @@
 /** UI 라벨 (실서비스 화면 공통) */
 export const koreanHeadings = {
-  dashboardTitle: 'AI 법률 스크리닝 어시스턴트',
+  dashboardTitle: '계약 분석 리포트',
   riskSummary: '리스크 요약 현황',
   totalRisks: '총 발견 리스크',
   highRisks: '고위험 리스크',
@@ -12,8 +12,8 @@ export const koreanHeadings = {
   category: '분야',
   summary: '요약',
   originalText: '계약서 본문 조항',
-  recommendation: 'AI 추천 수정 조항',
-  analysisDetail: '법무 검토 보조를 위한 AI 분석 상세',
+  recommendation: '추천 수정 조항',
+  analysisDetail: '법무 검토 보조를 위한 분석 상세',
   remedyCost: '조치 난이도/비용',
   riskOverview: '리스크 오버뷰',
   uploadContract: '계약서 스크리닝 분석 요청',

@@ -382,7 +382,7 @@ export const Dashboard: React.FC = () => {
     startScreeningMutation.reset();
   };
 
-  // Direct edit: apply AI recommendation to the document block text
+  // Direct edit: apply the recommendation to the document block text
   const handleApplyRecommendation = (riskId: string, recommendationText: string) => {
     setBlocks(prev => prev.map(block => {
       if (block.riskId === riskId) {
@@ -503,15 +503,15 @@ export const Dashboard: React.FC = () => {
       <div className="w-full max-w-4xl mx-auto space-y-12 py-8 animate-fade-in-up">
         {/* 헤더 안내 영역 */}
         <div className="text-center space-y-4">
-          <div className="inline-flex items-center gap-1.5 bg-navy-50 text-navy-800 px-3.5 py-1.5 rounded-full border border-navy-100 text-xs font-semibold uppercase tracking-wider mb-2">
+          <div className="inline-flex items-center gap-1.5 bg-navy-50 text-navy-800 px-3.5 py-1.5 rounded-full border border-navy-100 text-xs font-medium tracking-wide mb-2">
             <Activity className="w-3.5 h-3.5" />
-            AI 법률 스크리닝 플랫폼
+            계약 분석
           </div>
           <h1 className="text-4xl font-semibold text-slate-900 leading-tight tracking-tight">
-            계약서 검토를 더 쉽고, 빠르게
+            계약서 검토 보조 시스템
           </h1>
           <p className="text-sm text-slate-600 max-w-xl mx-auto leading-relaxed">
-            비밀유지계약서(NDA) 등 상거래 계약서를 업로드해 보세요. 민감 정보 마스킹 후 AI가 독소 조항과 면책 범위를 분석하고 수정 권고안을 제안합니다. 본 결과는 법무 검토 보조를 위한 AI 분석 결과입니다.
+            비밀유지계약서(NDA) 등 상거래 계약서를 업로드하면 민감 정보 마스킹 후 주요 위험 조항과 수정 권고안을 확인할 수 있습니다. 본 결과는 법무 검토 보조를 위한 참고 자료입니다.
           </p>
         </div>
 
@@ -523,9 +523,9 @@ export const Dashboard: React.FC = () => {
                 <div className="mx-auto w-12 h-12 rounded-xl bg-navy-800/5 text-navy-800 flex items-center justify-center mb-3 group-hover:scale-105 group-hover:bg-navy-800/10 transition-all duration-300">
                   <Upload className="w-6 h-6" />
                 </div>
-                <CardTitle className="text-xl font-bold text-slate-800">계약서 파일 분석 시작하기</CardTitle>
+                <CardTitle className="text-xl font-bold text-slate-800">계약서 분석 시작</CardTitle>
                 <CardDescription className="text-xs leading-relaxed max-w-md mx-auto mt-1">
-                  PDF, DOCX, TXT 파일을 업로드하면 마스킹·법률 스크리닝·수정 권고 생성 단계가 순차적으로 실행됩니다.
+                  PDF, DOCX, TXT 파일을 업로드하면 마스킹, 조항 분석, 수정 권고 생성 단계가 순차적으로 실행됩니다.
                 </CardDescription>
               </CardHeader>
 
@@ -539,7 +539,7 @@ export const Dashboard: React.FC = () => {
                     <p className="text-sm font-bold text-rose-900">계약서 분석에 실패했습니다</p>
                     <p className="text-xs text-rose-800 leading-relaxed">{uploadError}</p>
                     <p className="text-[11px] text-rose-700">
-                      백엔드 서버가 실행 중인지 확인한 뒤, PDF·DOCX·TXT 파일로 다시 시도해 주세요.
+                      분석 서버가 실행 중인지 확인한 뒤, PDF·DOCX·TXT 파일로 다시 시도해 주세요.
                     </p>
                     <button
                       type="button"
@@ -573,7 +573,7 @@ export const Dashboard: React.FC = () => {
                   <div className="flex flex-col items-start w-full gap-4 py-2 px-1 select-none animate-slide-in">
                     <div className="flex items-center gap-2 w-full justify-center">
                       <RefreshCw className="w-4 h-4 text-navy-800 animate-spin shrink-0" />
-                      <span className="text-xs font-bold text-slate-700">민감 정보 마스킹 및 AI 계약서 분석 중...</span>
+                      <span className="text-xs font-bold text-slate-700">민감 정보 마스킹 및 계약서 분석 중...</span>
                     </div>
                     {/* Shimmering Timeline Steps */}
                     <div className="space-y-3.5 w-full max-w-md mx-auto text-left py-2">
@@ -617,7 +617,7 @@ export const Dashboard: React.FC = () => {
                           {uploadStep > 4 ? <Check className="w-3 h-3" /> : '4'}
                         </span>
                         <span className={`text-xs font-medium leading-5 transition-colors duration-300 ${uploadStep === 4 ? 'text-navy-800' : 'text-slate-300'}`}>
-                          AI 수정 권고안 생성 및 검토
+                          수정 권고안 생성 및 검토
                         </span>
                       </div>
                     </div>
@@ -636,7 +636,7 @@ export const Dashboard: React.FC = () => {
                     <div className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-500 animate-pulse-ring">
                       <Check className="w-7 h-7" />
                     </div>
-                    <span className="text-sm font-bold text-slate-800">계약서 분석 완료!</span>
+                    <span className="text-sm font-bold text-slate-800">계약서 분석 완료</span>
                     <span className="text-xs text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
                       분석 결과 리포트 준비 완료
                     </span>
@@ -645,7 +645,7 @@ export const Dashboard: React.FC = () => {
                   <div className="flex flex-col items-center justify-center py-10">
                     <FileText className="w-12 h-12 text-slate-400 group-hover:text-navy-800 group-hover:scale-105 transition-all duration-300 mb-4" />
                     <span className="text-sm font-bold text-slate-800">마우스 클릭 또는 드래그하여 계약서 업로드</span>
-                    <span className="text-[11px] text-slate-500 mt-2">지원 형식: PDF, DOCX, TXT (최대 10MB) · 데모 환경</span>
+                    <span className="text-[11px] text-slate-500 mt-2">지원 형식: PDF, DOCX, TXT (최대 10MB)</span>
                   </div>
                 )}
               </div>
@@ -653,7 +653,7 @@ export const Dashboard: React.FC = () => {
 
             <div className="pt-4 border-t border-slate-100 mt-6 flex items-center justify-center gap-1.5 text-xs text-slate-600 font-semibold text-center leading-relaxed">
               <Info className="w-4 h-4 text-navy-800 shrink-0" />
-              <span>민감 정보 마스킹 후 AI 분석을 수행합니다. 데모 환경에서는 업로드 문서가 일시적으로 메모리에 보관될 수 있습니다.</span>
+              <span>민감 정보 마스킹 후 계약 분석을 수행합니다. 업로드 문서는 처리 과정에서 일시적으로 보관될 수 있습니다.</span>
             </div>
           </Card>
         </div>
@@ -664,9 +664,9 @@ export const Dashboard: React.FC = () => {
             <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
               <AlertTriangle className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-slate-900 text-sm">독소 조항 실시간 검출</h3>
+            <h3 className="font-bold text-slate-900 text-sm">위험 조항 검출</h3>
             <p className="text-xs text-slate-500 leading-relaxed">
-              면책 조항, 무제한 손해배상 등 편면적인 계약 요소를 실시간 분석 및 탐지합니다.
+              면책 조항, 무제한 손해배상 등 편면적인 계약 요소를 분석하고 표시합니다.
             </p>
           </div>
 
@@ -674,7 +674,7 @@ export const Dashboard: React.FC = () => {
             <div className="w-10 h-10 rounded-xl bg-navy-50 text-navy-800 flex items-center justify-center mx-auto border border-navy-100">
               <Sparkles className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-slate-900 text-sm">AI 맞춤 수정 권고</h3>
+            <h3 className="font-bold text-slate-900 text-sm">수정 권고안</h3>
             <p className="text-xs text-slate-500 leading-relaxed">
               상법 및 표준 계약서를 참고하여 검토에 활용할 수 있는 수정 권고안을 제안합니다.
             </p>
@@ -696,7 +696,7 @@ export const Dashboard: React.FC = () => {
             </div>
             <h3 className="font-bold text-slate-900 text-sm">안전성 점수 진단</h3>
             <p className="text-xs text-slate-500 leading-relaxed">
-              리스크 심각도를 합산한 계약 리스크 점수(0~100)입니다. AI 분석 결과이며 최종 법적 판단을 대체하지 않습니다.
+              리스크 심각도를 합산한 계약 리스크 점수(0~100)입니다. 최종 법적 판단을 대체하지 않습니다.
             </p>
           </div>
         </div>
@@ -761,15 +761,15 @@ export const Dashboard: React.FC = () => {
       {/* Top Banner Dashboard Actions */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-200/80 pb-6">
         <div>
-          <div className="inline-flex items-center gap-1.5 bg-navy-50 text-navy-800 px-3 py-1 rounded-full border border-navy-100 text-xs font-semibold uppercase tracking-wider mb-2">
+          <div className="inline-flex items-center gap-1.5 bg-navy-50 text-navy-800 px-3 py-1 rounded-full border border-navy-100 text-xs font-medium tracking-wide mb-2">
             <Activity className="w-3.5 h-3.5" />
-            AI 법률 스크리닝 플랫폼
+            계약 분석
           </div>
           <h1 className="text-3xl font-semibold text-slate-900 leading-tight tracking-tight">
             {koreanHeadings.dashboardTitle}
           </h1>
           <p className="text-sm text-slate-600 mt-1">
-            NDA 및 상거래 계약서의 독소 조항·배상 한도를 AI가 검출하고 수정 권고안을 제시합니다. 법무 검토 보조를 위한 참고 자료입니다.
+            NDA 및 상거래 계약서의 위험 조항과 배상 한도를 분석하고 수정 권고안을 제시합니다. 법무 검토 보조를 위한 참고 자료입니다.
           </p>
         </div>
 
@@ -794,12 +794,7 @@ export const Dashboard: React.FC = () => {
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              실시간 문서 검토
-              {activeRisks.length > 0 && (
-                <span className="relative flex h-2 w-2">
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
-                </span>
-              )}
+              문서 검토
             </button>
           </div>
           
@@ -830,7 +825,7 @@ export const Dashboard: React.FC = () => {
                   <CardTitle className="text-base font-bold text-slate-800">계약 안전성 종합 레포트</CardTitle>
                 </div>
                 <CardDescription className="text-xs">
-                  검출된 리스크 심각도를 기준으로 계산한 계약 리스크 점수입니다. 법무 검토 보조를 위한 AI 분석 결과이며 최종 법적 판단을 대체하지 않습니다.
+                  검출된 리스크 심각도를 기준으로 계산한 계약 리스크 점수입니다. 법무 검토 보조를 위한 참고 자료이며 최종 법적 판단을 대체하지 않습니다.
                 </CardDescription>
               </CardHeader>
               
@@ -864,7 +859,7 @@ export const Dashboard: React.FC = () => {
                   {/* Inside circle number */}
                   <div className="absolute flex flex-col items-center justify-center">
                     <span className="text-2xl font-semibold text-slate-900 leading-none">{safetyScore}</span>
-                    <span className="text-[10px] text-slate-500 font-bold mt-0.5 uppercase tracking-wide">안전 점수</span>
+                    <span className="text-[10px] text-slate-500 font-medium mt-0.5 tracking-wide">안전 점수</span>
                   </div>
                 </div>
 
@@ -884,8 +879,7 @@ export const Dashboard: React.FC = () => {
               
               <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold">
                 <span className="text-slate-600">
-                  AI 권고안 반영률: <span className="text-navy-800 font-bold">{resolvedCount} / {contract.risks.length} 건</span>
-                  <span className="ml-2 text-[10px] text-emerald-700 font-bold">· API 연동</span>
+                  권고안 반영률: <span className="text-navy-800 font-bold">{resolvedCount} / {contract.risks.length} 건</span>
                 </span>
                 {safetyScore < 100 && (
                   <button 
@@ -897,7 +891,7 @@ export const Dashboard: React.FC = () => {
                     }}
                     className="text-navy-800 hover:text-navy-900 flex items-center gap-1 transition-colors group/btn cursor-pointer"
                   >
-                    즉시 조치하기
+                    검토하기
                     <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-0.5" />
                   </button>
                 )}
@@ -911,7 +905,7 @@ export const Dashboard: React.FC = () => {
               <Card variant="dashboard" className="border-l-4 border-rose-500 flex flex-col justify-between p-6 shadow-sm transition-all duration-300">
                 <CardHeader className="p-0">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-rose-800 uppercase tracking-wide">
+                    <span className="text-xs font-semibold text-rose-800 tracking-wide">
                       {koreanHeadings.highRisks}
                     </span>
                     <div className="w-8 h-8 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500">
@@ -931,7 +925,7 @@ export const Dashboard: React.FC = () => {
               <Card variant="dashboard" className="border-l-4 border-amber-500 flex flex-col justify-between p-6 shadow-sm transition-all duration-300">
                 <CardHeader className="p-0">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-amber-800 uppercase tracking-wide">
+                    <span className="text-xs font-semibold text-amber-800 tracking-wide">
                       {koreanHeadings.mediumRisks}
                     </span>
                     <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500">
@@ -951,7 +945,7 @@ export const Dashboard: React.FC = () => {
               <Card variant="dashboard" className="border-l-4 border-emerald-500 flex flex-col justify-between p-6 shadow-sm transition-all duration-300">
                 <CardHeader className="p-0">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-emerald-800 uppercase tracking-wide">
+                    <span className="text-xs font-semibold text-emerald-800 tracking-wide">
                       {koreanHeadings.lowRisks}
                     </span>
                     <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-500">
@@ -971,17 +965,17 @@ export const Dashboard: React.FC = () => {
 
           </div>
 
-          {/* API 스크리닝 보고서 (백엔드) */}
+          {/* 분석 원문 미리보기 */}
           {apiScreening?.output_report && (
             <div className="pt-2">
               <Card variant="dashboard" className="p-5 border border-navy-100/80 bg-navy-50/30">
                 <CardHeader className="p-0 mb-3">
                   <CardTitle className="text-sm font-bold text-slate-800 flex items-center gap-2">
                     <FileCheck className="w-4 h-4 text-navy-800" />
-                    API 스크리닝 보고서 (백엔드)
+                    분석 원문 미리보기
                   </CardTitle>
                   <CardDescription className="text-xs">
-                    POST /api/screen 결과의 output_report 미리보기입니다. 법무 검토 보조를 위한 AI 분석 결과입니다.
+                    법무 검토 보조를 위해 생성된 분석 원문 일부를 표시합니다.
                   </CardDescription>
                 </CardHeader>
                 <pre className="text-[11px] leading-relaxed p-4 rounded-xl bg-white border border-slate-200 max-h-40 overflow-y-auto whitespace-pre-wrap font-sans text-slate-700">
@@ -997,7 +991,7 @@ export const Dashboard: React.FC = () => {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="text-slate-900 font-bold text-lg flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-navy-800" />
-                실시간 스크리닝 리스크 검출 조항
+                검출 조항
               </div>
               
               {/* Search Bar Input */}
@@ -1219,15 +1213,15 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* RIGHT PANE: AI Redlining Feed Panel */}
+          {/* RIGHT PANE: Redlining Feed Panel */}
           <div className="lg:col-span-5 space-y-6">
             <Card variant="dashboard" className="border-l-4 border-l-navy-800 shadow-sm p-6 flex flex-col justify-between">
               
               <div className="space-y-5">
                 <CardHeader className="pb-3 border-b border-slate-100 p-0 mb-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] bg-navy-800/10 text-navy-800 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider border border-navy-800/10">
-                      AI 법률 분석 피드
+                    <span className="text-[10px] bg-navy-800/10 text-navy-800 px-2.5 py-0.5 rounded-full font-medium tracking-wide border border-navy-800/10">
+                      조항 분석
                     </span>
                     
                     {selectedBlock?.isResolved ? (
@@ -1258,7 +1252,7 @@ export const Dashboard: React.FC = () => {
 
                 {/* Risk Explanation */}
                 <div className="space-y-1.5 p-3.5 bg-slate-50 border border-slate-200/60 rounded-xl">
-                  <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">리스크 분석 요약</span>
+                  <span className="text-[10px] font-semibold text-slate-500 tracking-wide">리스크 분석 요약</span>
                   <p className="text-xs font-bold text-slate-800 leading-relaxed">
                     {selectedRisk?.summary}
                   </p>
@@ -1297,7 +1291,7 @@ export const Dashboard: React.FC = () => {
                     <div className="space-y-3.5 animate-slide-in">
                       {/* Original text block */}
                       <div className="space-y-1">
-                        <span className="text-[10px] font-semibold text-rose-700 uppercase tracking-wide flex items-center gap-1">
+                        <span className="text-[10px] font-semibold text-rose-700 tracking-wide flex items-center gap-1">
                           <AlertTriangle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
                           {koreanHeadings.originalClause}
                         </span>
@@ -1309,7 +1303,7 @@ export const Dashboard: React.FC = () => {
                       {/* Recommendation block */}
                       {selectedRisk && (
                         <div className="space-y-1">
-                          <span className="text-[10px] font-semibold text-navy-800 uppercase tracking-wide flex items-center gap-1">
+                          <span className="text-[10px] font-semibold text-navy-800 tracking-wide flex items-center gap-1">
                             <Sparkles className="w-3.5 h-3.5 text-navy-800 shrink-0" />
                             {koreanHeadings.suggestedClause}
                           </span>
@@ -1321,9 +1315,9 @@ export const Dashboard: React.FC = () => {
                     </div>
                   ) : (
                     <div className="space-y-1.5 animate-slide-in">
-                      <span className="text-[10px] font-semibold text-navy-800 uppercase tracking-wide flex items-center gap-1 select-none">
+                      <span className="text-[10px] font-semibold text-navy-800 tracking-wide flex items-center gap-1 select-none">
                         <Sparkles className="w-3.5 h-3.5 text-navy-800 shrink-0" />
-                        AI 자동 수정 권고 레드라인 (단어 비교)
+                        수정 권고 레드라인 (단어 비교)
                       </span>
                       {selectedRisk && selectedBlock && renderWordDiff(selectedDiffParts)}
                     </div>
@@ -1347,7 +1341,7 @@ export const Dashboard: React.FC = () => {
                         className="w-full bg-navy-800 hover:bg-navy-900 text-white text-xs font-semibold py-2.5 px-4 rounded-xl shadow-sm transition-all duration-300 hover:shadow flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"
                       >
                         <FileCheck className="w-3.5 h-3.5" />
-                        AI 수정 권고안 본문 반영
+                        수정 권고안 본문 반영
                       </button>
                     )
                   )}
