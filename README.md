@@ -13,6 +13,21 @@ Google AI Agent 예선용 **legal-screening-assistant** 기반 프로젝트입�
 - Node.js 18+
 - Python 3.10+
 
+## 자동 검사 (CI)
+
+GitHub Actions는 pull request, `main` 브랜치 push, 수동 실행(`workflow_dispatch`)에서 두 잡을 실행한다. 각 잡은 `ubuntu-latest`에서 최대 15분 동안 실행한다.
+
+- **프론트엔드 빌드**: Node.js 22와 npm 캐시를 설정하고 `npm ci --no-audit --no-fund`로 의존성을 설치한 뒤 `npm run build`를 실행한다.
+- **백엔드 핵심 테스트 수집 검사**: Python 3.12와 pip 캐시를 설정하고 CPU 전용 PyTorch를 먼저 설치한 뒤 `python -m pip install -r requirements.txt`를 실행한다. 이어서 다음 명령으로 핵심 6개 파일의 테스트 131개가 수집되는지만 확인한다.
+
+  ```bash
+  python -m pytest --collect-only -q tests/test_parser.py tests/test_masking.py tests/test_rag_retriever.py tests/test_agent_pipeline.py tests/test_law_api_ingester.py tests/test_db_connector.py
+  ```
+
+  이 단계는 테스트를 실행하지 않으며 통합 테스트 성공을 의미하지 않는다. CI에는 `LEGAL_DISABLE_FAISS=1`, `HF_HUB_OFFLINE=1`, `TRANSFORMERS_OFFLINE=1`을 설정해 외부 모델 접근을 막는다.
+
+현재 확인된 전체 pytest 수집 오류 2건은 모두 API 테스트에서 `fastapi`가 누락되어 발생한다. 저장소에 `run_review.py`가 없다는 점은 별도의 정적 확인 사항이며, 수집 오류 원인에 포함하지 않는다. 핵심 6개 파일을 실행한 기준 결과는 130개 통과와 1개 실패(`test_masking.py::TestMaskingEdgeCases::test_no_entity_text`의 오탐 마스킹)이며, `npm run lint`는 오류 9건과 경고 2건을 보고한다. CI의 백엔드 잡은 이 실패들을 감추거나 테스트를 통과 처리하지 않고, 위 핵심 테스트의 수집 여부만 확인한다. 모델·데이터베이스·API의 실제 연동은 검증하지 않는다.
+
 ## 빠른 시작 (개발)
 
 ### 1. 프론트엔드
