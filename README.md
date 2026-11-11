@@ -8,7 +8,7 @@ Google AI Agent 예선용 **legal-screening-assistant** 기반 프로젝트입�
 **Phase 5**: 오프라인 빌드(`base: './'`), Docker Compose, KPI `/api/metrics`.  
 **Phase 7**: LangGraph `StateGraph` 실제 도입 (`backend/graph/workflow.py`).
 
-## 유소민의 역할
+## 담당 역할
 
 Deepgle Legal의 데이터 수집·정리와 프론트엔드·백엔드 개발에 참여했다. 계약서 업로드부터 분석·결과 조회까지 연결하고 팀원의 API·검색 변경을 통합했다.
 
