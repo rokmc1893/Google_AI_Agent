@@ -10,9 +10,9 @@ Google AI Agent 예선용 **legal-screening-assistant** 기반 프로젝트입�
 
 ## 유소민의 역할
 
-유소민은 Deepgle Legal 팀 프로젝트에서 데이터 수집·정리와 프론트엔드·백엔드 개발에 참여하고, 계약서 업로드부터 분석·결과 조회까지의 API 연결과 데모 흐름 통합을 진행했다.
+Deepgle Legal의 데이터 수집·정리와 프론트엔드·백엔드 개발에 참여했다. 계약서 업로드부터 분석·결과 조회까지 연결하고 팀원의 API·검색 변경을 통합했다.
 
-구체적인 작업·산출물·팀 협업과 검증 범위는 [개인 역할과 기여](docs/CONTRIBUTIONS.md)에 정리했다.
+[주요 작업과 관련 코드](docs/CONTRIBUTIONS.md)
 
 ## 요구 사항
 
